@@ -45,13 +45,16 @@ public class RequestStandby extends SimpleBehaviour {
 		}
 		
 		msg.setContent(myPosition);
-		
-		
+		((mas.abstractAgent)this.myAgent).sendMessage(msg);
 	}
 
 	@Override
 	public boolean done() {
 		return this.finished;
+	}
+	
+	public int onEnd() {
+		return 1;
 	}
 
 }

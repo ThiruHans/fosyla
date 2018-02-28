@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import mas.abstractAgent;
+import mas.behaviours.CheckVoicemail;
 import mas.behaviours.ExplorationBehaviour;
 import mas.behaviours.RequestStandby;
 import env.Environment;
@@ -65,10 +66,9 @@ public class ExploAgent extends abstractAgent{
 		fsm.registerState(new RequestStandby(this), "RequestStandby");
 		// fsm.
 		
-		// fsm.registerTransition("Explore", "RequestStandby", 1);
+		fsm.registerTransition("Explore", "RequestStandby", 1);
 
 		System.out.println("the agent "+this.getLocalName()+ " is started");
-
 	}
 	
 	public HashMap<String, HashSet<String>> getMap() {

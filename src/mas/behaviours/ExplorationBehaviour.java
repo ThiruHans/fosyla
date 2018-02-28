@@ -19,10 +19,11 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 	
 	private List<String> openedNodes;
 	private HashMap<String, String> exploredNodes;
-	// transition: 
+	// transitionId: 
 	// - 0 si boucle sur le meme comportement
 	// - 1 si checkVoicemail
 	// - 2 si requestStandby
+	// - 3 si exploration finie
 	private int transitionId = 0;
 	
 	private static final long serialVersionUID = 9088209402507795289L;
@@ -73,7 +74,7 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 				System.out.println("Agent terminated, list of visited nodes:");
 				System.out.println(map.entrySet());
 				System.out.println("Number of discovered nodes:" + map.size());
-				this.;
+				this.transitionId = 3;
 				return;
 			}
 					
@@ -101,11 +102,12 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 				e.printStackTrace();
 			}
 			
+			this.transitionId = 1;
 			// move to next node.
 			// 2) Move to the picked location. The move action (if any) MUST be the last action of your behaviour
 			if(!((mas.abstractAgent)this.myAgent).moveTo(nextNode)) {
 				// obstacle rencontré, essayer de communiquer
-				this.finished = true;
+				this.transitionId = 2;
 			}
 		}
 
@@ -113,10 +115,10 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 
 	@Override
 	public boolean done() {
-		return this.finished;
+		return this.transitionId != 0;
 	}
 	
 	public int onEnd() {
-		return 1;
+		return this.transitionId;
 	}
 }
