@@ -3,6 +3,7 @@ package mas.behaviours;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import mas.agents.ExploAgent;
 
 public class WaitForStandby extends SimpleBehaviour {
 
@@ -15,9 +16,13 @@ public class WaitForStandby extends SimpleBehaviour {
 		final ACLMessage msg = this.myAgent.receive(mt);
 		
 		if(msg != null) {
+			// add ack sender to recipients for SendData behaviour
+			((ExploAgent)this.myAgent).getRecipients().add(msg.getSender());
 			
+			this.transitionId = 1;
 		} else {
-			block();
+			block(500);
+			this.transitionId = 2;
 		}
 	}
 

@@ -1,4 +1,4 @@
-package mas.agents;
+package utils;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -7,22 +7,16 @@ import java.util.List;
 
 
 public class MessageContainer implements Serializable {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 7027481640243066857L;
 	
 	private HashMap<String, HashSet<String>> map;
 	private List<String> openedNodes;
-	private HashMap<String, String> exploredNodes;
 
 	
 	public MessageContainer(HashMap<String, HashSet<String>> map, 
-			List<String> openedNodes, HashMap<String, String> exploredNodes) {
+			List<String> openedNodes) {
 		this.map = map;
 		this.openedNodes = openedNodes;
-		this.exploredNodes = exploredNodes;
 	}
 
 
@@ -34,11 +28,4 @@ public class MessageContainer implements Serializable {
 	public List<String> getOpenedNodes() {
 		return openedNodes;
 	}
-
-
-	public HashMap<String, String> getExploredNodes() {
-		return exploredNodes;
-	}
-
-	
 }

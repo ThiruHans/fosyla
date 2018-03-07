@@ -1,6 +1,7 @@
 package mas.agents;
 
 
+import jade.core.AID;
 import jade.core.behaviours.FSMBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -27,6 +28,9 @@ public class ExploAgent extends abstractAgent{
 	private List<String> openedNodes;
 	private HashMap<String, String> exploredNodes;
 	
+	private HashMap<String, Boolean> currentState;
+	private List<AID> recipients;
+	
 	protected void setup() {
 
 		super.setup();
@@ -34,9 +38,7 @@ public class ExploAgent extends abstractAgent{
 		//get the parameters given into the object[]. In the current case, the environment where the agent will evolve
 		final Object[] args = getArguments();
 		if(args[0]!=null){
-
 			deployAgent((Environment) args[0]);
-
 		}else{
 			System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
 			System.exit(-1);
@@ -51,13 +53,16 @@ public class ExploAgent extends abstractAgent{
 		dfd.setName(getAID());
 		ServiceDescription sd  = new ServiceDescription();
 		sd.setType("explorer");
-		sd.setName(getLocalName() );
+		sd.setName(getLocalName());
 		dfd.addServices(sd);
 		try {
 			DFService.register(this, dfd );
 		} catch (FIPAException fe) { 
 			fe.printStackTrace(); 
 		}
+		
+		// Init state
+		this.currentState.put("blocked", false);
 		
 		//Add the behaviours
 		FSMBehaviour fsm = new FSMBehaviour();
@@ -82,4 +87,13 @@ public class ExploAgent extends abstractAgent{
 	public HashMap<String, String> getExploredNodes() {
 		return exploredNodes;
 	}
+
+	public HashMap<String, Boolean> getCurrentState() {
+		return currentState;
+	}
+
+	public List<AID> getRecipients() {
+		return recipients;
+	}
+	
 }

@@ -22,8 +22,7 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 	// transitionId: 
 	// - 0 si boucle sur le meme comportement
 	// - 1 si checkVoicemail
-	// - 2 si requestStandby
-	// - 3 si exploration finie
+	// - 2 si exploration finie
 	private int transitionId = 0;
 	
 	private static final long serialVersionUID = 9088209402507795289L;
@@ -38,15 +37,17 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 
 	@Override
 	public void action() {
+		// Cast to ExploAgent
+		ExploAgent agent = ((ExploAgent)this.myAgent);
 		//Example to retrieve the current position
-		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
+		String myPosition=agent.getCurrentPosition();
 			
 		if (myPosition != ""){
 			//List of observable from the agent's current position
-			List<Couple<String,List<Attribute>>> lobs=((mas.abstractAgent)this.myAgent).observe();//myPosition
+			List<Couple<String,List<Attribute>>> lobs=agent.observe();//myPosition
 			System.out.println(this.myAgent.getLocalName()+" -- list of observables: "+lobs);
 			
-			HashMap<String, HashSet<String>> map = ((ExploAgent)this.myAgent).getMap();
+			HashMap<String, HashSet<String>> map = agent.getMap();
 			// Add current position to map if not contained already.
 			if(!map.containsKey(myPosition)) {				
 				map.put(myPosition, new HashSet<String>());
@@ -74,7 +75,7 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 				System.out.println("Agent terminated, list of visited nodes:");
 				System.out.println(map.entrySet());
 				System.out.println("Number of discovered nodes:" + map.size());
-				this.transitionId = 3;
+				this.transitionId = 2;
 				return;
 			}
 					
@@ -105,9 +106,10 @@ public class ExplorationBehaviour extends SimpleBehaviour {
 			this.transitionId = 1;
 			// move to next node.
 			// 2) Move to the picked location. The move action (if any) MUST be the last action of your behaviour
-			if(!((mas.abstractAgent)this.myAgent).moveTo(nextNode)) {
+			if(!agent.moveTo(nextNode)) {
 				// obstacle rencontré, essayer de communiquer
-				this.transitionId = 2;
+				agent.getCurrentState().put("blocked", true);
+				this.transitionId = 1;
 			}
 		}
 
