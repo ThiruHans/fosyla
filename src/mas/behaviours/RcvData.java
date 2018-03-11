@@ -9,23 +9,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import mas.agents.ExploAgent;
-import utils.MessageContainer;
+import mas.agents.ExplorationAgent;
+import utils.MapDataContainer;
 
 public class RcvData extends SimpleBehaviour {
 	private static final long serialVersionUID = -1268869791618955047L;
 	private boolean finished = false;
 
+	public RcvData(ExplorationAgent explorationAgent) {
+		super(explorationAgent);
+	}
+
 	@Override
 	public void action() {
 		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		final ACLMessage msg = this.myAgent.receive(mt);
-		ExploAgent agent = ((ExploAgent)this.myAgent);
+		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
 		
 	 	if (msg != null) {
-	 		MessageContainer mc;
+	 		agent.log("Data received, combining...");
+	 		MapDataContainer mc;
 			try {
-				mc = (MessageContainer)msg.getContentObject();
+				mc = (MapDataContainer)msg.getContentObject();
 				HashMap<String, HashSet<String>> otherMap = mc.getMap();
 				HashMap<String, HashSet<String>> map = agent.getMap();
 				List<String> openedNodes = agent.getOpenedNodes();
@@ -38,15 +43,20 @@ public class RcvData extends SimpleBehaviour {
 			} catch (UnreadableException e) {
 				e.printStackTrace();
 			}
-			this.finished = true;
 	 	} else {
-	 		block(500);
+	 		block(1000);
+			agent.log("No data received yet, waiting for one second.");
 	 	}
+	 	this.finished = true;
 	}
 
 	@Override
 	public boolean done() {
 		return this.finished;
+	}
+
+	public int onEnd() {
+		return 1;
 	}
 
 }

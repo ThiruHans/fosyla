@@ -11,7 +11,7 @@ import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import mas.agents.ExploAgent;
+import mas.agents.ExplorationAgent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,32 +23,31 @@ import env.Environment.ENVtype;
 
 public class Principal {
 
-	private static String hostname = "127.0.0.1"; 
-	private static HashMap<String, ContainerController> containerList=new HashMap<String, ContainerController>();// container's name - container's ref
-	private static List<AgentController> agentList;// agents's ref
-	private static Runtime rt;	
+	private static String hostname = "127.0.0.1";
+	// container's name - container's ref
+	private static HashMap<String, ContainerController> containerList = new HashMap<String, ContainerController>();
+	private static List<AgentController> agentList; // agents's ref
+	private static Runtime rt;
 
 	private static Environment env;// static ref of the real environment
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 
 		System.out.println("Hello !");
 		//0) Create the real environment and the observed one
-		env= new Environment(ENVtype.GRID_T,2,null);
-//		env= new Environment(ENVtype.DOROGOVTSEV_T,15,null);
+		env = new Environment(ENVtype.GRID_T,2,null);
+		//env= new Environment(ENVtype.DOROGOVTSEV_T,15,null);
 		//env=new Environment("ressources/map2017-2","ressources/map2017-config");
 		
 		//1), create the platform (Main container (DF+AMS) + containers + monitoring agents : RMA and SNIFFER)
-		rt=emptyPlatform(containerList);
+		rt = emptyPlatform(containerList);
 
 		//2) create agents and add them to the platform.
-		agentList=createAgents(containerList);
+		agentList = createAgents(containerList);
 
 		//3) launch agents
 		startAgents(agentList);
-
 	}
-
 
 
 	/**********************************************
@@ -62,7 +61,7 @@ public class Principal {
 	 * 
 	 * @return a ref to the platform and update the containerList
 	 */
-	private static Runtime emptyPlatform(HashMap<String, ContainerController> containerList){
+	private static Runtime emptyPlatform(HashMap<String, ContainerController> containerList) {
 
 		Runtime rt = Runtime.instance();
 
@@ -227,30 +226,27 @@ public class Principal {
 //
 		//Agent0 on container0
 		c = containerList.get("container0");
-		agentName="Agent1";
+		agentName="Explorator1";
 		try {
 
 			Object[] objtab=new Object[]{env};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
+			AgentController	ag=c.createNewAgent(agentName,ExplorationAgent.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//
-////
+
 		c = containerList.get("container0");
-		agentName="Agent2";
+		agentName="Explorator2";
 		try {
 
 
 			Object[] objtab=new Object[]{env};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
+			AgentController	ag=c.createNewAgent(agentName,ExplorationAgent.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

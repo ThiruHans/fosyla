@@ -1,14 +1,16 @@
 package mas.behaviours;
 
+import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 
-import mas.agents.ExploAgent;
+import mas.agents.ExplorationAgent;
 
-public class CheckVoicemail extends SimpleBehaviour {
+public class CheckVoiceMail extends SimpleBehaviour {
 
 	private static final long serialVersionUID = 8991919761504652388L;
 	// transitionId: 
@@ -17,32 +19,43 @@ public class CheckVoicemail extends SimpleBehaviour {
 	// - 3 si RequestStandby
 	private int transitionId = 0;
 
-	public CheckVoicemail(ExploAgent exploAgent) {
-		super(exploAgent);
+	public CheckVoiceMail(ExplorationAgent explorationAgent) {
+		super(explorationAgent);
 	}
 
 	@Override
 	public void action() {
-		ExploAgent agent = ((ExploAgent)this.myAgent);
+		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
 		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 		final ACLMessage msg = this.myAgent.receive(mt);
 		this.transitionId = 1;
+
 		if (msg != null) {
-			// add sender to agent recipients to share data in SendData behaviour.
-			agent.getRecipients().add(msg.getSender());
-			// send acknowledgement
+
+			// Add sender to agent recipients to share data in SendData behaviour.
+			List<AID> recipientsList = (List<AID>)this.getDataStore().get("recipients_for_sharing");
+			recipientsList.add(msg.getSender());
+
+			agent.log("Message received in voicemail from: "+ msg.getSender());
+			// Send acknowledgement to sender
 			ACLMessage ack = new ACLMessage(ACLMessage.CONFIRM);
 			ack.addReceiver(msg.getSender());
+			ack.setSender(agent.getAID());
 //			ack.setConversationId(agent.getAID() + ";" + msg.getSender());
 			agent.sendMessage(ack);
-			
+
+			// Switch to SendData behaviour
 			this.transitionId = 2;
 		} else {
-			HashMap<String, Boolean> state = agent.getCurrentState();
-			if (state.get("blocked")) {
+			// If no message was received and the agent checked the voicemail because of collision:
+			// RequestStandby to nearby agents.
+			Boolean blockedState = (boolean)this.getDataStore().get("exploration_blocked_notification");
+			if (blockedState) {
+				agent.log("No message was received but the agent was blocked");
 				this.transitionId = 3;
-				state.put("blocked", false);
+				this.getDataStore().put("exploration_blocked_notification", false);
 			}
+			// Otherwise, just go back to exploring
 		}
 	}
 

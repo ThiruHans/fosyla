@@ -1,33 +1,40 @@
 package mas.behaviours;
 
 import java.io.IOException;
+import java.util.List;
 
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
-import mas.agents.ExploAgent;
-import utils.MessageContainer;
+import mas.agents.ExplorationAgent;
+import utils.MapDataContainer;
 
 public class SendData extends SimpleBehaviour {
 	private static final long serialVersionUID = -2619032417307731004L;
 	private boolean finished = false;
 
+	public SendData(ExplorationAgent explorationAgent) {
+		super(explorationAgent);
+	}
+
 	@Override
 	public void action() {
-		ExploAgent agent = ((ExploAgent)this.myAgent);
+		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
 		
-		ACLMessage datmsg = new ACLMessage(ACLMessage.INFORM);
+		ACLMessage dataMessage = new ACLMessage(ACLMessage.INFORM);
+		dataMessage.setSender(agent.getAID());
 		try {
-			datmsg.setContentObject(new MessageContainer(agent.getMap(), agent.getOpenedNodes()));
+			dataMessage.setContentObject(new MapDataContainer(agent.getMap(), agent.getOpenedNodes()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		for(AID aid : agent.getRecipients()) {
-			datmsg.addReceiver(aid);
+		List<AID> recipients = (List<AID>)this.getDataStore().get("recipients_for_sharing");
+		for(AID aid : recipients) {
+			dataMessage.addReceiver(aid);
 		}
-		agent.getRecipients().clear();
-		agent.sendMessage(datmsg);
-		
+		agent.log("Send data to "+ recipients);
+		recipients.clear();
+		agent.sendMessage(dataMessage);
 		this.finished = true;
 	}
 
