@@ -35,9 +35,9 @@ public class Principal {
 
 		System.out.println("Hello !");
 		//0) Create the real environment and the observed one
-		env = new Environment(ENVtype.GRID_T,2,null);
-		//env= new Environment(ENVtype.DOROGOVTSEV_T,15,null);
-		//env=new Environment("ressources/map2017-2","ressources/map2017-config");
+		//env = new Environment(ENVtype.GRID_T,2,null);
+//		env= new Environment(ENVtype.DOROGOVTSEV_T,15,null);
+		env=new Environment("ressources/map2017-2","ressources/map2017-config");
 		
 		//1), create the platform (Main container (DF+AMS) + containers + monitoring agents : RMA and SNIFFER)
 		rt = emptyPlatform(containerList);
@@ -239,6 +239,32 @@ public class Principal {
 
 		c = containerList.get("container0");
 		agentName="Explorator2";
+		try {
+
+
+			Object[] objtab=new Object[]{env};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExplorationAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+		
+		c = containerList.get("container0");
+		agentName="Explorator3";
+		try {
+
+
+			Object[] objtab=new Object[]{env};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExplorationAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+		
+		c = containerList.get("container0");
+		agentName="Explorator4";
 		try {
 
 

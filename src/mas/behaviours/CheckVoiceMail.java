@@ -54,8 +54,10 @@ public class CheckVoiceMail extends SimpleBehaviour {
 				agent.log("No message was received but the agent was blocked");
 				this.transitionId = 3;
 				this.getDataStore().put("exploration_blocked_notification", false);
+				return;
 			}
 			// Otherwise, just go back to exploring
+			this.transitionId = 1;
 		}
 	}
 

@@ -73,7 +73,7 @@ public class ExplorationAgent extends abstractAgent {
 		dataStore.put("exploration_blocked_notification", false);
 		dataStore.put("recipients_for_sharing", new ArrayList<>());
 
-		// Initialise behaviours
+		// Initialize behaviors
 		Exploration explorationBehaviour = new Exploration(this);
 		CheckVoiceMail checkVoiceMailBehaviour = new CheckVoiceMail(this);
 		SendData sendDataBehaviour = new SendData(this);
@@ -87,7 +87,7 @@ public class ExplorationAgent extends abstractAgent {
 		sendDataBehaviour.setDataStore(dataStore);
 		waitForStandbyBehaviour.setDataStore(dataStore);
 
-		// Add the behaviours to the Finite State Machine.
+		// Add the behaviors to the Finite State Machine.
 		FSMBehaviour fsm = new FSMBehaviour();
 		fsm.registerFirstState(explorationBehaviour, "Explore");
 		fsm.registerState(checkVoiceMailBehaviour, "CheckVoiceMail");
@@ -124,7 +124,8 @@ public class ExplorationAgent extends abstractAgent {
 	}
 
 	public void log(String s) {
-		System.out.println("["+this.getLocalName()+"] " + s);
+		String myPosition = this.getCurrentPosition();
+		System.out.println("["+this.getLocalName()+"@"+myPosition+"] " + s);
 	}
 	
 }

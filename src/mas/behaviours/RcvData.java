@@ -14,7 +14,7 @@ import utils.MapDataContainer;
 
 public class RcvData extends SimpleBehaviour {
 	private static final long serialVersionUID = -1268869791618955047L;
-	private boolean finished = false;
+	private int attempts = 0;
 
 	public RcvData(ExplorationAgent explorationAgent) {
 		super(explorationAgent);
@@ -22,6 +22,7 @@ public class RcvData extends SimpleBehaviour {
 
 	@Override
 	public void action() {
+		attempts += 1;
 		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		final ACLMessage msg = this.myAgent.receive(mt);
 		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
@@ -39,20 +40,19 @@ public class RcvData extends SimpleBehaviour {
 					if(!map.containsKey(e)) map.put(e, otherMap.get(e));
 					if(openedNodes.contains(e)) openedNodes.remove(e);
 				}
-				
+			attempts += 1;	
 			} catch (UnreadableException e) {
 				e.printStackTrace();
 			}
 	 	} else {
-	 		block(1000);
+	 		block(500);
 			agent.log("No data received yet, waiting for one second.");
 	 	}
-	 	this.finished = true;
 	}
 
 	@Override
 	public boolean done() {
-		return this.finished;
+		return attempts > 1;
 	}
 
 	public int onEnd() {

@@ -82,8 +82,7 @@ public class Exploration extends SimpleBehaviour {
 		// next goal is first opened node in list
 		int index = openedNodes.size()-1;
 		String nextNode = openedNodes.get(index);
-		this.explorationAgent.log("Currently opened:" + openedNodes);
-		this.explorationAgent.log("Next goal is :" + nextNode);
+		this.explorationAgent.log("Next goal is :" + nextNode + ". Currently opened:" + openedNodes + ". NDiscovered="+map.size());
 
 		if(currentPositionNeighbors.contains(nextNode)) {
 			// Remove opened node if reached
@@ -96,22 +95,23 @@ public class Exploration extends SimpleBehaviour {
 			nextNode = exploredNodes.get(myPosition);
 		}
 
-		try {
-			this.explorationAgent.log("Moving to " + nextNode);
-			this.explorationAgent.log("Press Enter in the console to allow the agent to execute its next move");
-			System.in.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			this.explorationAgent.log("Moving to " + nextNode);
+//			this.explorationAgent.log("Press Enter in the console to allow the agent to execute its next move");
+//			System.in.read();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
-		this.transitionId = 0;
+		this.transitionId = 1;
 		// move to next node.
 		// Move to the picked location. The move action (if any) MUST be the last action of your behaviour
 		if(!this.explorationAgent.moveTo(nextNode)) {
 			// obstacle, engage communication.
 			this.getDataStore().put("exploration_blocked_notification", true);
-			this.transitionId = 1;
 		}
+		
+		block(200);
 	}
 
 	@Override

@@ -12,6 +12,7 @@ public class WaitForStandby extends SimpleBehaviour {
 
 	private static final long serialVersionUID = -8324034246585574116L;
 	private int transitionId = 0;
+	private int attempts = 0;
 
 	public WaitForStandby(ExplorationAgent explorationAgent) {
 		super(explorationAgent);
@@ -19,16 +20,18 @@ public class WaitForStandby extends SimpleBehaviour {
 
 	@Override
 	public void action() {
+		attempts += 1;
 		ExplorationAgent agent = (ExplorationAgent)this.myAgent;
 		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
 		final ACLMessage msg = this.myAgent.receive(mt);
 		
 		if(msg != null) {
 			agent.log("WaitForStandby: Ack received.");
-			// add ack sender to recipients for SendData behaviour
+			// add ack sender to recipients for SendData behavior
 			((List<AID>)this.getDataStore().get("recipients_for_sharing")).add(msg.getSender());
 			// Go to SendData
 			this.transitionId = 1;
+			attempts += 1;
 		} else {
 			block(500);
 			// No message received in the interval
@@ -39,7 +42,7 @@ public class WaitForStandby extends SimpleBehaviour {
 
 	@Override
 	public boolean done() {
-		return this.transitionId != 0;
+		return attempts > 1;
 	}
 
 	public int onEnd() {

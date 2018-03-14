@@ -38,6 +38,7 @@ public class RequestStandby extends SimpleBehaviour {
 			results = DFService.search(this.myAgent, dfd);
 			if (results.length>0) {
 				for(DFAgentDescription d : results) {
+					if(d.getName().equals(agent.getName())) continue;
 					msg.addReceiver(d.getName());
 				}
 			}
