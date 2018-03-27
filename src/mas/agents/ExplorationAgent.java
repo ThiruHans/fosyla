@@ -108,7 +108,7 @@ public class ExplorationAgent extends abstractAgent {
 		fsm.registerTransition("WaitForStandby", "CheckVoiceMail", 2);
 
 		addBehaviour(fsm);
-		System.out.println("the agent "+this.getLocalName()+ " is started");
+		System.out.println("the agent "+this.getLocalName()+" is started");
 	}
 	
 	public HashMap<String, HashSet<String>> getMap() {
