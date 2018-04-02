@@ -11,6 +11,7 @@ import java.util.List;
 
 import mas.agents.ExplorationAgent;
 import utils.MapDataContainer;
+import utils.MessageContainer;
 
 public class RcvData extends SimpleBehaviour {
 	private static final long serialVersionUID = -1268869791618955047L;
@@ -29,17 +30,22 @@ public class RcvData extends SimpleBehaviour {
 		
 	 	if (msg != null) {
 	 		agent.log("Data received, combining...");
-	 		MapDataContainer mc;
+	 		MessageContainer mc;
 			try {
-				mc = (MapDataContainer)msg.getContentObject();
-				HashMap<String, HashSet<String>> otherMap = mc.getMap();
+				mc = (MessageContainer) msg.getContentObject();
+				MapDataContainer mapDataContainer = mc.getMap();
+				HashMap<String, HashSet<String>> otherMap = mapDataContainer.getMap();
 				HashMap<String, HashSet<String>> map = agent.getMap();
 				List<String> openedNodes = agent.getOpenedNodes();
 				
 				for(String e : otherMap.keySet()) {
 					if(!map.containsKey(e)) map.put(e, otherMap.get(e));
-					if(openedNodes.contains(e)) openedNodes.remove(e);
+					openedNodes.remove(e);
 				}
+
+				List<String> otherPath = mc.getCurrentPath();
+				List<String> ownPath = agent.getPlan();
+				agent.log("Size of other plan : " + otherPath.size() + " | Size of own plan : " + ownPath.size());
 			attempts += 1;	
 			} catch (UnreadableException e) {
 				e.printStackTrace();

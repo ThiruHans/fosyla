@@ -33,6 +33,10 @@ public class ExplorationAgent extends abstractAgent {
 	// For each explored node, the parent node used to access it is stored. It is used by the exploration
 	// behaviour to find paths to the next goal.
 	private HashMap<String, String> exploredNodes;
+	// Current plan consists of the path to the next goal node.
+	private List<String> currentPlan;
+	// Current tick: used for logging to differentiate steps
+	private int tick;
 
 	protected void setup() {
 
@@ -51,6 +55,7 @@ public class ExplorationAgent extends abstractAgent {
 		this.map = new HashMap<>();
 		this.exploredNodes = new HashMap<>();
 		this.openedNodes = new ArrayList<>();
+		this.tick = 0;
 		
 		// Register to DFService to enable communication with the other agents. The AID is
 		// then available to all agents.
@@ -125,7 +130,17 @@ public class ExplorationAgent extends abstractAgent {
 
 	public void log(String s) {
 		String myPosition = this.getCurrentPosition();
-		System.out.println("["+this.getLocalName()+"@"+myPosition+"] " + s);
+		System.out.println("["+this.getLocalName()+" @ "+myPosition+ " /" +this.tick +"] " + s);
 	}
-	
+
+	public List<String> getPlan() {
+		return this.currentPlan;
+	}
+	public void setPlan(List<String> newPlan) {
+		this.currentPlan = newPlan;
+	}
+
+	public void tick() {
+		this.tick += 1;
+	}
 }

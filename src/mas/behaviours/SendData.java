@@ -8,6 +8,7 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import mas.agents.ExplorationAgent;
 import utils.MapDataContainer;
+import utils.MessageContainer;
 
 public class SendData extends SimpleBehaviour {
 	private static final long serialVersionUID = -2619032417307731004L;
@@ -24,7 +25,9 @@ public class SendData extends SimpleBehaviour {
 		ACLMessage dataMessage = new ACLMessage(ACLMessage.INFORM);
 		dataMessage.setSender(agent.getAID());
 		try {
-			dataMessage.setContentObject(new MapDataContainer(agent.getMap(), agent.getOpenedNodes()));
+			MessageContainer messageContainer = new MessageContainer(new MapDataContainer(agent.getMap(), agent.getOpenedNodes()),
+					agent.getPlan());
+			dataMessage.setContentObject(messageContainer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

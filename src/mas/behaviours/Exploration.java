@@ -2,6 +2,7 @@ package mas.behaviours;
 
 import env.Attribute;
 import env.Couple;
+import graph.Dijkstra;
 import jade.core.behaviours.SimpleBehaviour;
 import mas.agents.ExplorationAgent;
 
@@ -21,19 +22,22 @@ public class Exploration extends SimpleBehaviour {
 	// - 1 si checkVoicemail
 	// - 2 si exploration finie
 	private int transitionId = 0;
+	private Dijkstra dijkstra;
 
 	public Exploration(ExplorationAgent explorationAgent) {
 		super(explorationAgent);
 		this.explorationAgent = (ExplorationAgent)this.myAgent;
+		this.dijkstra = new Dijkstra(this.explorationAgent.getMap());
 	}
 
 	@Override
 	public void action() {
+		this.explorationAgent.tick();
 		// Get current position.
 		String myPosition = this.explorationAgent.getCurrentPosition();
 		// Get agent data
 		List<String> openedNodes = this.explorationAgent.getOpenedNodes();
-		Map<String, String> exploredNodes = this.explorationAgent.getExploredNodes();
+//		Map<String, String> exploredNodes = this.explorationAgent.getExploredNodes();
 		Map<String, HashSet<String>> map = this.explorationAgent.getMap();
 
 		// On startup, position may not be defined right away.
@@ -47,6 +51,8 @@ public class Exploration extends SimpleBehaviour {
 		if(!map.containsKey(myPosition)) {
 			map.put(myPosition, new HashSet<>());
 		}
+		// Remove current position from openedNodes
+		openedNodes.remove(myPosition);
 
 		HashSet<String> currentPositionNeighbors = map.get(myPosition);
 		// For each discovered node
@@ -79,21 +85,46 @@ public class Exploration extends SimpleBehaviour {
 
 		}
 
-		// next goal is first opened node in list
-		int index = openedNodes.size()-1;
-		String nextNode = openedNodes.get(index);
-		this.explorationAgent.log("Next goal is :" + nextNode + ". Currently opened:" + openedNodes + ". NDiscovered="+map.size());
-
-		if(currentPositionNeighbors.contains(nextNode)) {
-			// Remove opened node if reached
-			openedNodes.remove(index);
-			// set predecessor
-			exploredNodes.put(nextNode, myPosition);
+		String nextNode;
+		// If the agent has a planned path:
+		List<String> plan = this.explorationAgent.getPlan();
+		if(plan != null && plan.size() > 1) {
+			// The next node is the next node in the plan.
+			plan.remove(myPosition);
+			nextNode = plan.get(plan.size()-1);
+			this.explorationAgent.log("Path : " + plan);
 		} else {
-			// Find path to next node
-			// by backtracking
-			nextNode = exploredNodes.get(myPosition);
+			// Next goal is next unexplored node in `openedNodes`.
+			// Compute shortest path to goal with Dijkstra:
+			this.dijkstra.computeShortestPaths(myPosition);
+			String goal = openedNodes.get(openedNodes.size()-1);
+			this.explorationAgent.log("New goal : " + goal + ". Currently opened:" + openedNodes + ". NDiscovered="+map.size());
+			plan = this.dijkstra.getPath(myPosition, goal);
+			this.explorationAgent.log("Path : " + plan);
+//			this.explorationAgent.log("MAP:" + map);
+			if (plan == null) nextNode = goal;
+			else {
+				this.explorationAgent.setPlan(plan);
+				nextNode = plan.get(plan.size() - 1);
+			}
 		}
+		this.explorationAgent.log("Next node is :" + nextNode);
+
+		// next goal is first opened node in list
+//		int index = openedNodes.size()-1;
+//		String nextNode = openedNodes.get(index);
+//		this.explorationAgent.log("Next goal is :" + nextNode + ". Currently opened:" + openedNodes + ". NDiscovered="+map.size());
+//
+//		if(currentPositionNeighbors.contains(nextNode)) {
+//			// Remove opened node if reached
+//			openedNodes.remove(index);
+//			// set predecessor
+//			exploredNodes.put(nextNode, myPosition);
+//		} else {
+//			// Find path to next node
+//			// by backtracking
+//			nextNode = exploredNodes.get(myPosition);
+//		}
 
 //		try {
 //			this.explorationAgent.log("Moving to " + nextNode);
