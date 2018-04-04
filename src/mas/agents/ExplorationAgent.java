@@ -77,6 +77,7 @@ public class ExplorationAgent extends abstractAgent {
 		DataStore dataStore = new DataStore();
 		dataStore.put("exploration_blocked_notification", false);
 		dataStore.put("recipients_for_sharing", new ArrayList<>());
+		dataStore.put("movement_behaviour", "exploration");
 
 		// Initialize behaviors
 		Exploration explorationBehaviour = new Exploration(this);
@@ -85,12 +86,14 @@ public class ExplorationAgent extends abstractAgent {
 		RcvData rcvDataBehaviour = new RcvData(this);
 		RequestStandby requestStandbyBehaviour = new RequestStandby(this);
 		WaitForStandby waitForStandbyBehaviour = new WaitForStandby(this);
+		RandomWalkBehaviour randomWalkBehaviour = new RandomWalkBehaviour(this);
 
 		// Common data store.
 		explorationBehaviour.setDataStore(dataStore);
 		checkVoiceMailBehaviour.setDataStore(dataStore);
 		sendDataBehaviour.setDataStore(dataStore);
 		waitForStandbyBehaviour.setDataStore(dataStore);
+		rcvDataBehaviour.setDataStore(dataStore);
 
 		// Add the behaviors to the Finite State Machine.
 		FSMBehaviour fsm = new FSMBehaviour();
@@ -100,6 +103,7 @@ public class ExplorationAgent extends abstractAgent {
 		fsm.registerState(waitForStandbyBehaviour, "WaitForStandby");
 		fsm.registerState(sendDataBehaviour, "SendData");
 		fsm.registerState(rcvDataBehaviour, "RcvData");
+		fsm.registerState(randomWalkBehaviour, "RandomWalk");
 
 		// Register all transitions.
 		fsm.registerTransition("Explore", "CheckVoiceMail", 1);
@@ -107,10 +111,12 @@ public class ExplorationAgent extends abstractAgent {
 		fsm.registerTransition("CheckVoiceMail", "SendData", 2);
 		fsm.registerTransition("CheckVoiceMail", "RequestStandby", 3);
 		fsm.registerTransition("SendData", "RcvData", 1);
-		fsm.registerTransition("RcvData", "Explore", 1);
+		fsm.registerTransition("RcvData", "RandomWalk", 1);
 		fsm.registerTransition("RequestStandby", "WaitForStandby", 1);
 		fsm.registerTransition("WaitForStandby", "SendData", 1);
 		fsm.registerTransition("WaitForStandby", "CheckVoiceMail", 2);
+		fsm.registerTransition("RandomWalk", "CheckVoiceMail", 1);
+		fsm.registerTransition("CheckVoiceMail", "RandomWalk", 4);
 
 		addBehaviour(fsm);
 		System.out.println("the agent "+this.getLocalName()+" is started");

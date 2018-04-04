@@ -45,19 +45,6 @@ public class RcvData extends SimpleBehaviour {
 
 				// Reset goal after receiving new data.
 				agent.getPlan().clear();
-				// If openedNodes is not empty: compute new plan.
-
-				// TODO: need to recompute next goal because after combining openedNodes has changed...
-				// detect conflict :
-				String otherPosition = mc.getPosition();
-				List<String> otherPath = mc.getCurrentPath();
-				String ownPosition = agent.getCurrentPosition();
-				List<String> ownPath = agent.getPlan();
-
-				if (otherPath.get(otherPath.size()-1).equals(ownPosition) &&
-						ownPath.get(ownPath.size()-1).equals(otherPosition)) {
-					agent.log("/!\\ CONFLICT DETECTED");
-				}
 			attempts += 1;
 			} catch (UnreadableException e) {
 				e.printStackTrace();
@@ -74,6 +61,8 @@ public class RcvData extends SimpleBehaviour {
 	}
 
 	public int onEnd() {
+		this.getDataStore().put("movement_behaviour", "random");
+		((ExplorationAgent)myAgent).log("Switching to RandomWalk.");
 		return 1;
 	}
 

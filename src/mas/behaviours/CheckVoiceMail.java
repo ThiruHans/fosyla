@@ -36,7 +36,7 @@ public class CheckVoiceMail extends SimpleBehaviour {
 			List<AID> recipientsList = (List<AID>)this.getDataStore().get("recipients_for_sharing");
 			recipientsList.add(msg.getSender());
 
-			agent.log("Message received in voicemail from: "+ msg.getSender());
+			agent.log("Message received in voice mail from: "+ msg.getSender());
 			// Send acknowledgement to sender
 			ACLMessage ack = new ACLMessage(ACLMessage.CONFIRM);
 			ack.addReceiver(msg.getSender());
@@ -56,7 +56,10 @@ public class CheckVoiceMail extends SimpleBehaviour {
 				return;
 			}
 			// Otherwise, just go back to exploring
-			this.transitionId = 1;
+			if (this.getDataStore().get("movement_behaviour").equals("random"))
+				this.transitionId = 4;
+			else
+				this.transitionId = 1;
 		}
 	}
 

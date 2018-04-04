@@ -2,7 +2,7 @@ package mas.behaviours;
 
 import jade.core.behaviours.SimpleBehaviour;
 import mas.agents.ExplorationAgent;
-import utils.Priority;
+
 
 public class ConflictResolution extends SimpleBehaviour {
     private ExplorationAgent agent;
@@ -14,7 +14,7 @@ public class ConflictResolution extends SimpleBehaviour {
 
     @Override
     public void action() {
-//        int priority = Priority.compute(this.agent, );
+
     }
 
     @Override
