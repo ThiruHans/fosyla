@@ -80,6 +80,8 @@ public class Exploration extends SimpleBehaviour {
 //			System.out.println("Agent "+this.myAgent.getLocalName()+" terminated, list of visited nodes:");
 //			System.out.println(map.entrySet());
 //			System.out.println("Number of discovered nodes:" + map.size());
+			explorationAgent.log("Exploration finished.");
+			explorationAgent.kill();
 			this.transitionId = 1;
 			return;
 

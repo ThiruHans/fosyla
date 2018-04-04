@@ -25,8 +25,13 @@ public class SendData extends SimpleBehaviour {
 		ACLMessage dataMessage = new ACLMessage(ACLMessage.INFORM);
 		dataMessage.setSender(agent.getAID());
 		try {
-			MessageContainer messageContainer = new MessageContainer(new MapDataContainer(agent.getMap(), agent.getOpenedNodes()),
-					agent.getPlan());
+
+			MessageContainer messageContainer = new MessageContainer();
+			messageContainer.setAid(agent.getAID());
+			messageContainer.setPosition(agent.getCurrentPosition());
+			messageContainer.setMapDataContainer(new MapDataContainer(agent.getMap(), agent.getOpenedNodes()));
+			messageContainer.setCurrentPath(agent.getPlan());
+
 			dataMessage.setContentObject(messageContainer);
 		} catch (IOException e) {
 			e.printStackTrace();

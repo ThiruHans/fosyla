@@ -143,4 +143,5 @@ public class ExplorationAgent extends abstractAgent {
 	public void tick() {
 		this.tick += 1;
 	}
+	public void kill() { this.takeDown();}
 }

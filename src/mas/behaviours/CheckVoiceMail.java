@@ -41,7 +41,6 @@ public class CheckVoiceMail extends SimpleBehaviour {
 			ACLMessage ack = new ACLMessage(ACLMessage.CONFIRM);
 			ack.addReceiver(msg.getSender());
 			ack.setSender(agent.getAID());
-//			ack.setConversationId(agent.getAID() + ";" + msg.getSender());
 			agent.sendMessage(ack);
 
 			// Switch to SendData behaviour
