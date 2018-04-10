@@ -15,10 +15,16 @@ import utils.MessageContainer;
 
 public class RcvData extends SimpleBehaviour {
 	private static final long serialVersionUID = -1268869791618955047L;
-	private int attempts = 0;
+	private int attempts;
+	private int transitionId;
+
+	public static final int T_SEND_GOAL = 10;
+	public static final int T_CHECK_VOICEMAIL = 11;
 
 	public RcvData(ExplorationAgent explorationAgent) {
 		super(explorationAgent);
+		this.attempts = 0;
+		this.transitionId = T_CHECK_VOICEMAIL;
 	}
 
 	@Override
@@ -29,7 +35,7 @@ public class RcvData extends SimpleBehaviour {
 		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
 		
 	 	if (msg != null) {
-	 		agent.log("Data received, combining...");
+	 		agent.log("Data received, processing...");
 	 		MessageContainer mc;
 			try {
 				mc = (MessageContainer) msg.getContentObject();
@@ -37,21 +43,28 @@ public class RcvData extends SimpleBehaviour {
 				HashMap<String, HashSet<String>> otherMap = mapDataContainer.getMap();
 				HashMap<String, HashSet<String>> map = agent.getMap();
 				List<String> openedNodes = agent.getOpenedNodes();
-				
+
+//				agent.log("++++++++++++++++ map before");
+//				agent.log(map.toString());
+//				agent.log(otherMap.toString());
 				for(String e : otherMap.keySet()) {
-					if(!map.containsKey(e)) map.put(e, otherMap.get(e));
+					if (map.containsKey(e)) map.get(e).addAll(otherMap.get(e));
+					else map.put(e, otherMap.get(e));
 					openedNodes.remove(e);
 				}
+//				agent.log("map after");
+//				agent.log(map.toString());
+//				agent.log("++++++++++++++++");
 
-				// Reset goal after receiving new data.
-				agent.getPlan().clear();
+				this.getDataStore().put("aid_for_goal", mc.getAID());
+				this.transitionId = T_SEND_GOAL;
 			attempts += 1;
 			} catch (UnreadableException e) {
 				e.printStackTrace();
 			}
 	 	} else {
 	 		block(500);
-			agent.log("No data received yet, waiting for one second.");
+			agent.log("No data received yet, waiting for 500ms.");
 	 	}
 	}
 
@@ -61,9 +74,8 @@ public class RcvData extends SimpleBehaviour {
 	}
 
 	public int onEnd() {
-		this.getDataStore().put("movement_behaviour", "random");
-		((ExplorationAgent)myAgent).log("Switching to RandomWalk.");
-		return 1;
+		this.attempts = 0;
+		return this.transitionId;
 	}
 
 }

@@ -11,8 +11,7 @@ import mas.agents.ExplorationAgent;
 public class RequestStandby extends SimpleBehaviour {
 
 	private static final long serialVersionUID = -5079787101111370695L;
-	
-	private boolean finished = false;
+	public static final int T_WAIT_FOR_STANDBY = 10;
 
 	public RequestStandby(ExplorationAgent agent) {
 		super(agent);
@@ -30,7 +29,7 @@ public class RequestStandby extends SimpleBehaviour {
 		// get potential receivers
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd  = new ServiceDescription();
-		sd.setType( "explorer" ); 
+//		sd.setType( "explorer" );
 		dfd.addServices(sd);
 		DFAgentDescription[] results;
 		
@@ -38,7 +37,7 @@ public class RequestStandby extends SimpleBehaviour {
 			results = DFService.search(this.myAgent, dfd);
 			if (results.length>0) {
 				for(DFAgentDescription d : results) {
-					if(d.getName().equals(agent.getName())) continue;
+					if(d.getName().equals(agent.getAID())) continue;
 					msg.addReceiver(d.getName());
 				}
 			}
@@ -49,17 +48,15 @@ public class RequestStandby extends SimpleBehaviour {
 		
 		msg.setContent(myPosition);
 		agent.sendMessage(msg);
-
-		this.finished = true;
 	}
 
 	@Override
 	public boolean done() {
-		return this.finished;
+		return true;
 	}
 	
 	public int onEnd() {
-		return 1;
+		return T_WAIT_FOR_STANDBY;
 	}
 
 }

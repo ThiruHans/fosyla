@@ -10,17 +10,17 @@ import java.util.Random;
 
 
 
-public class RandomWalkBehaviour extends SimpleBehaviour {
-	/**
-	 * When an agent choose to move
-	 *  
-	 */
-	private static final long serialVersionUID = 9088209402507795289L;
-	private int maxSteps = 10;
-	private int step = 0;
+public class RandomWalk extends SimpleBehaviour {
 
-	public RandomWalkBehaviour (final mas.abstractAgent myagent) {
+	private static final long serialVersionUID = 9088209402507795289L;
+	public static final int T_CHECK_VOICEMAIL = 10;
+	private static final int MAX_STEPS = 5;
+	private int step = 0;
+	private Random random;
+
+	public RandomWalk(final mas.abstractAgent myagent) {
 		super(myagent);
+		this.random = ((ExplorationAgent)myagent).getRandomGenerator();
 	}
 
 	@Override
@@ -36,28 +36,31 @@ public class RandomWalkBehaviour extends SimpleBehaviour {
 			//List of observable from the agent's current position
 			List<Couple<String,List<Attribute>>> lobs=((mas.abstractAgent)this.myAgent).observe();//myPosition
 
-			//Random move from the current position
-			Random r= new Random();
-			//1) get a couple <Node ID,list of percepts> from the list of observables
-			int moveId=r.nextInt(lobs.size());
+			((ExplorationAgent)this.myAgent).updateMap();
 
-			((ExplorationAgent)this.myAgent).log("RandomWalk| Step = " + this.step);
+			//1) get a couple <Node ID,list of percepts> from the list of observables
+			int moveId=this.random.nextInt(lobs.size());
+			while (lobs.get(moveId).getLeft().equals(myPosition)) {
+				moveId = this.random.nextInt(lobs.size());
+			}
+
+			((ExplorationAgent)this.myAgent).log("|RandomWalk| Step = " + this.step);
 
 			//2) Move to the picked location. The move action (if any) MUST be the last action of your behaviour
-			((mas.abstractAgent)this.myAgent).moveTo(lobs.get(moveId).getLeft());
+			if(!((mas.abstractAgent)this.myAgent).moveTo(lobs.get(moveId).getLeft())) {
+				this.getDataStore().put("exploration_blocked_notification", true);
+			}
 		}
-
 	}
 
 	public boolean done() {
-		((ExplorationAgent)this.myAgent).log("RandomWalk| DONE");
-		return this.step >= this.maxSteps;
+		return this.step >= MAX_STEPS;
 	}
 
 	public int onEnd() {
-		this.getDataStore().put("movement_behaviour", "exploration");
-
-		return 1;
+		this.getDataStore().put("movement_behaviour", this.getDataStore().get("default_movement_behaviour"));
+		this.step = 0;
+		return T_CHECK_VOICEMAIL;
 	}
 
 }

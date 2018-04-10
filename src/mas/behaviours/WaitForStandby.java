@@ -14,11 +14,15 @@ public class WaitForStandby extends SimpleBehaviour {
 	private int transitionId = 0;
 	private int attempts = 0;
 
+	public static final int T_SEND_DATA = 10;
+	public static final int T_CHECK_VOICEMAIL = 11;
+
 	public WaitForStandby(ExplorationAgent explorationAgent) {
 		super(explorationAgent);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void action() {
 		attempts += 1;
 		ExplorationAgent agent = (ExplorationAgent)this.myAgent;
@@ -30,13 +34,13 @@ public class WaitForStandby extends SimpleBehaviour {
 			// add ack sender to recipients for SendData behavior
 			((List<AID>)this.getDataStore().get("recipients_for_sharing")).add(msg.getSender());
 			// Go to SendData
-			this.transitionId = 1;
+			this.transitionId = T_SEND_DATA;
 			attempts += 1;
 		} else {
 			block(500);
 			// No message received in the interval
 			agent.log("WaitForStandby: No ack received, waiting for 500millis.");
-			this.transitionId = 2;
+			this.transitionId = T_CHECK_VOICEMAIL;
 		}
 	}
 
@@ -46,6 +50,7 @@ public class WaitForStandby extends SimpleBehaviour {
 	}
 
 	public int onEnd() {
+		attempts = 0;
 		return this.transitionId;
 	}
 

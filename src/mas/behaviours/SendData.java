@@ -14,11 +14,14 @@ public class SendData extends SimpleBehaviour {
 	private static final long serialVersionUID = -2619032417307731004L;
 	private boolean finished = false;
 
+	public static final int T_RCV_DATA = 10;
+
 	public SendData(ExplorationAgent explorationAgent) {
 		super(explorationAgent);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void action() {
 		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
 		
@@ -30,7 +33,6 @@ public class SendData extends SimpleBehaviour {
 			messageContainer.setAid(agent.getAID());
 			messageContainer.setPosition(agent.getCurrentPosition());
 			messageContainer.setMapDataContainer(new MapDataContainer(agent.getMap(), agent.getOpenedNodes()));
-			messageContainer.setCurrentPath(agent.getPlan());
 
 			dataMessage.setContentObject(messageContainer);
 		} catch (IOException e) {
@@ -52,7 +54,7 @@ public class SendData extends SimpleBehaviour {
 	}
 	
 	public int onEnd() {
-		return 1;
+		return T_RCV_DATA;
 	}
 
 }

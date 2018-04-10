@@ -2,6 +2,7 @@
 .project
 .settings/
 bin/
+out/
 .idea/
 APDescription.txt
 MTPs-Main-Container.txt
