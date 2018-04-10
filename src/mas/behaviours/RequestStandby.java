@@ -2,24 +2,24 @@ package mas.behaviours;
 
 import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import mas.agents.ExplorationAgent;
+import mas.agents.AgentP;
 
 public class RequestStandby extends SimpleBehaviour {
 
 	private static final long serialVersionUID = -5079787101111370695L;
 	public static final int T_WAIT_FOR_STANDBY = 10;
 
-	public RequestStandby(ExplorationAgent agent) {
+	public RequestStandby(AgentP agent) {
 		super(agent);
 	}
 
 	@Override
 	public void action() {
-		ExplorationAgent agent = (ExplorationAgent)this.myAgent;
+		AgentP agent = (AgentP) this.myAgent;
 		String myPosition = agent.getCurrentPosition();
 		agent.log("Requesting standby from nearby agents");
 		

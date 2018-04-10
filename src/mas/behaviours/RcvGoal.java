@@ -4,6 +4,7 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import mas.agents.AgentP;
 import mas.agents.ExplorationAgent;
 import utils.MessageContainer;
 
@@ -15,8 +16,8 @@ public class RcvGoal extends SimpleBehaviour {
     public static final int CONFLICT_RESOLUTION = 10;
     public static final int T_CHECK_VOICEMAIL = 11;
 
-    public RcvGoal(ExplorationAgent explorationAgent) {
-        super(explorationAgent);
+    public RcvGoal(AgentP agentP) {
+        super(agentP);
         this.attempts = 0;
     }
 
@@ -25,7 +26,7 @@ public class RcvGoal extends SimpleBehaviour {
         attempts += 1;
         final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
         final ACLMessage msg = this.myAgent.receive(mt);
-        ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
+        AgentP agent = ((AgentP)this.myAgent);
 
         if (msg != null) {
             agent.log("Goal received, processing...");

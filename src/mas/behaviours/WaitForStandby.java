@@ -4,7 +4,7 @@ import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import mas.agents.ExplorationAgent;
+import mas.agents.AgentP;
 
 import java.util.List;
 
@@ -17,15 +17,15 @@ public class WaitForStandby extends SimpleBehaviour {
 	public static final int T_SEND_DATA = 10;
 	public static final int T_CHECK_VOICEMAIL = 11;
 
-	public WaitForStandby(ExplorationAgent explorationAgent) {
-		super(explorationAgent);
+	public WaitForStandby(AgentP agentP) {
+		super(agentP);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public void action() {
 		attempts += 1;
-		ExplorationAgent agent = (ExplorationAgent)this.myAgent;
+		AgentP agent = (AgentP) this.myAgent;
 		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
 		final ACLMessage msg = this.myAgent.receive(mt);
 		

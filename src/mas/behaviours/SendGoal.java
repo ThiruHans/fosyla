@@ -3,7 +3,7 @@ package mas.behaviours;
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
-import mas.agents.ExplorationAgent;
+import mas.agents.AgentP;
 import utils.MessageContainer;
 
 import java.io.IOException;
@@ -13,13 +13,13 @@ public class SendGoal extends SimpleBehaviour {
 
     public static final int T_RCV_GOAL = 10;
 
-    public SendGoal(ExplorationAgent explorationAgent) {
-        super(explorationAgent);
+    public SendGoal(AgentP agentP) {
+        super(agentP);
     }
 
     @Override
     public void action() {
-        ExplorationAgent agent = (ExplorationAgent)this.myAgent;
+        AgentP agent = (AgentP)this.myAgent;
         ACLMessage dataMessage = new ACLMessage(ACLMessage.PROPOSE);
         dataMessage.setSender(agent.getAID());
         dataMessage.addReceiver((AID)this.getDataStore().get("aid_for_goal"));

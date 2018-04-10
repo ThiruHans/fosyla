@@ -6,7 +6,7 @@ import java.util.List;
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
-import mas.agents.ExplorationAgent;
+import mas.agents.AgentP;
 import utils.MapDataContainer;
 import utils.MessageContainer;
 
@@ -16,14 +16,14 @@ public class SendData extends SimpleBehaviour {
 
 	public static final int T_RCV_DATA = 10;
 
-	public SendData(ExplorationAgent explorationAgent) {
-		super(explorationAgent);
+	public SendData(AgentP agentP) {
+		super(agentP);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public void action() {
-		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
+		AgentP agent = ((AgentP)this.myAgent);
 		
 		ACLMessage dataMessage = new ACLMessage(ACLMessage.INFORM);
 		dataMessage.setSender(agent.getAID());

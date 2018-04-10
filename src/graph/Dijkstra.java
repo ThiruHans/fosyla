@@ -47,11 +47,6 @@ public class Dijkstra {
 
     private void findMinimalDistance(String node) {
         Set<String> neighbors = map.get(node);
-        if (neighbors == null) {
-            System.out.println("-----------" + node);
-            System.out.println(map);
-            System.out.println("-----------");
-        }
         for (String neighbor : neighbors) {
             if (closedNodes.contains(neighbor)) continue;
 

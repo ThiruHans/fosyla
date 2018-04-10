@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import mas.agents.AgentP;
 import mas.agents.ExplorationAgent;
 import utils.MapDataContainer;
 import utils.MessageContainer;
@@ -21,8 +22,8 @@ public class RcvData extends SimpleBehaviour {
 	public static final int T_SEND_GOAL = 10;
 	public static final int T_CHECK_VOICEMAIL = 11;
 
-	public RcvData(ExplorationAgent explorationAgent) {
-		super(explorationAgent);
+	public RcvData(AgentP agentP) {
+		super(agentP);
 		this.attempts = 0;
 		this.transitionId = T_CHECK_VOICEMAIL;
 	}
@@ -32,7 +33,7 @@ public class RcvData extends SimpleBehaviour {
 		attempts += 1;
 		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 		final ACLMessage msg = this.myAgent.receive(mt);
-		ExplorationAgent agent = ((ExplorationAgent)this.myAgent);
+		AgentP agent = ((AgentP)this.myAgent);
 		
 	 	if (msg != null) {
 	 		agent.log("Data received, processing...");
