@@ -34,7 +34,6 @@ public class Exploration extends SimpleBehaviour {
 
 		if (openedNodes.isEmpty()) {
 			// If the set of opened nodes is empty, the agent's exploration can end.
-//			agent.log("Exploration finished: Switching to updatePOIs behaviour.");
 			agent.log("Exploration finished: Switching to random walk behaviour.");
 
 			this.getDataStore().put("default_movement_behaviour", ExplorationAgent.RANDOM_WALK);
@@ -61,7 +60,6 @@ public class Exploration extends SimpleBehaviour {
 		this.transitionId = T_CHECK_VOICEMAIL;
 		block(200);
 
-		// move to next node.
 		// Move to the picked location. The move action (if any) MUST be the last action of your behaviour
 		if(!this.agent.moveTo(nextNode)) {
 			// obstacle, engage communication.

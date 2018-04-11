@@ -5,6 +5,7 @@ import env.Couple;
 import env.EntityType;
 import env.Environment;
 import graph.Dijkstra;
+import jade.core.behaviours.DataStore;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -19,18 +20,22 @@ public class AgentP extends abstractAgent {
     public static final int T_EXPLORE = 20;
     public static final int RANDOM_WALK = 21;
     public static final int UPDATE_POIS = 22;
+    public static final int COLLECTION = 23;
 
     // Map of the environment known by the agent, stored as a list of neighbors for each node.
-    private HashMap<String, HashSet<String>> map;
+    protected HashMap<String, HashSet<String>> map;
     // Currently opened nodes: scheduled for exploration.
-    private HashMap<String, PointOfInterest> pois;
-    private List<String> openedNodes;
+    protected List<PointOfInterest> pois;
+    protected List<String> openedNodes;
     // Current plan consists of the path to the next goal node.
-    private List<String> currentPlan;
+    protected List<String> currentPlan;
     // Current tick: used for logging to differentiate steps
     private int tick;
-    private Dijkstra dijkstra;
-    private Random random;
+    protected Dijkstra dijkstra;
+    protected Random random;
+    private EntityType type;
+    protected DataStore dataStore;
+    protected PointOfInterest goalPoi;
 
     protected void setup() {
         super.setup();
@@ -39,6 +44,7 @@ public class AgentP extends abstractAgent {
         final Object[] args = getArguments();
         if(args[0]!=null && args[1]!=null){
             deployAgent((Environment) args[0], (EntityType)args[1]);
+            this.type = (EntityType)args[1];
         }else{
             System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
             System.exit(-1);
@@ -47,7 +53,7 @@ public class AgentP extends abstractAgent {
         // Initialise agent data
         this.map = new HashMap<>();
         this.openedNodes = new ArrayList<>();
-        this.pois = new HashMap<>();
+        this.pois = new ArrayList<>();
         this.tick = 0;
         this.dijkstra = new Dijkstra(this.map);
         this.random = new Random();
@@ -56,7 +62,7 @@ public class AgentP extends abstractAgent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd  = new ServiceDescription();
-//		sd.setType("explorer");
+		sd.setType(this.type.toString());
         sd.setName(getLocalName());
         dfd.addServices(sd);
         try {
@@ -64,6 +70,8 @@ public class AgentP extends abstractAgent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
+        
+        dataStore = new DataStore();
 
     }
 
@@ -90,6 +98,12 @@ public class AgentP extends abstractAgent {
         }
         // Remove current position from openedNodes
         openedNodes.remove(myPosition);
+        // Remove point of interest
+        // TODO: only update
+        if (goalPoi != null && goalPoi.getNode().equals(myPosition)) {
+        	pois.remove(goalPoi);
+        	goalPoi = null;
+        }
 
         HashSet<String> currentPositionNeighbors = map.get(myPosition);
         // For each discovered node
@@ -102,7 +116,7 @@ public class AgentP extends abstractAgent {
                 // If discovered for the first time, add unexplored node to map.
                 nodeNeighbors = new HashSet<>();
                 map.put(nodeId, nodeNeighbors);
-                // if discovered for the first time, add to opened nodes.
+                // if discoveredsuper.setup(); for the first time, add to opened nodes.
                 openedNodes.add(nodeId);
             } else {
                 nodeNeighbors = map.get(nodeId);
@@ -116,7 +130,13 @@ public class AgentP extends abstractAgent {
             List<Attribute> attrs = (List<Attribute>) observable.getRight();
             String node = (String) observable.getLeft();
             if (!attrs.isEmpty()) {
-                pois.put(node, new PointOfInterest(node, attrs, this.getTick()));
+            	List<Attribute> filteredAttrs = new ArrayList<>();
+            	for (Attribute attr : attrs) {
+            		if (!attr.getName().equals("Stench")) filteredAttrs.add(attr);
+            	}
+            	if (!filteredAttrs.isEmpty()) {
+            		pois.add(new PointOfInterest(node, filteredAttrs, this.getTick()));
+            	}
             }
             if (!this.map.containsKey(node)) {
                 this.openedNodes.add(node);
@@ -139,7 +159,7 @@ public class AgentP extends abstractAgent {
         this.log("New goal : " + goal + ". Currently opened:" + openedNodes + ". NDiscovered="+map.size());
         this.currentPlan = this.dijkstra.getPath(position, goal);
         this.log("Path : " + this.currentPlan);
-//		this.log("MAP:" + map);
+//		this.log("MAP:" + map);super.setup();
     }
 
     public Random getRandomGenerator() {
@@ -148,7 +168,7 @@ public class AgentP extends abstractAgent {
     public HashMap<String, HashSet<String>> getMap() {
         return this.map;
     }
-    public HashMap<String, PointOfInterest> getPois() { return this.pois; }
+    public List<PointOfInterest> getPois() { return this.pois; }
     public List<String> getOpenedNodes() {
         return openedNodes;
     }

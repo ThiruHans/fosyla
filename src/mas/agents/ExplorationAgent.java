@@ -33,7 +33,6 @@ public class ExplorationAgent extends AgentP {
 		// Init state
 		// The exploration agent provides a `dataStore` to some behaviours to allow the passing of data between state
 		// in the FSM.
-		DataStore dataStore = new DataStore();
 		dataStore.put("exploration_blocked_notification", false);
 		dataStore.put("recipients_for_sharing", new ArrayList<>());
 		dataStore.put("movement_behaviour", ExplorationAgent.T_EXPLORE);
@@ -76,8 +75,8 @@ public class ExplorationAgent extends AgentP {
 		// Register all transitions.
 		fsm.registerTransition("Explore", "CheckVoiceMail", Exploration.T_CHECK_VOICEMAIL);
 		fsm.registerTransition("CheckVoiceMail", "Explore", ExplorationAgent.T_EXPLORE);
-		fsm.registerTransition("CheckVoiceMail", "RandomWalk", ExplorationAgent.RANDOM_WALK)
-		;
+		fsm.registerTransition("CheckVoiceMail", "RandomWalk", ExplorationAgent.RANDOM_WALK);
+
 		fsm.registerTransition("CheckVoiceMail", "SendData", CheckVoiceMail.T_SEND_DATA);
 		fsm.registerTransition("CheckVoiceMail", "RequestStandby", CheckVoiceMail.T_REQUEST_STANDBY);
 		fsm.registerTransition("SendData", "RcvData", SendData.T_RCV_DATA);
