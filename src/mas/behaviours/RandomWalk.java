@@ -28,6 +28,7 @@ public class RandomWalk extends SimpleBehaviour {
 
 	@Override
 	public void action() {
+		this.agent.tick();
 		//Example to retrieve the current position
 		String myPosition=this.agent.getCurrentPosition();
 

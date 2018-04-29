@@ -2,6 +2,7 @@ package mas.behaviours;
 
 import jade.core.behaviours.SimpleBehaviour;
 import mas.agents.AgentP;
+import mas.agents.CollectorAgent;
 import mas.agents.ExplorationAgent;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class Exploration extends SimpleBehaviour {
 	private int transitionId = 0;
 
 	public static final int T_CHECK_VOICEMAIL = 10;
-
+	
 	public Exploration(AgentP agentP) {
 		super(agentP);
 		this.agent = agentP;
@@ -35,11 +36,9 @@ public class Exploration extends SimpleBehaviour {
 		if (openedNodes.isEmpty()) {
 			// If the set of opened nodes is empty, the agent's exploration can end.
 			agent.log("Exploration finished: Switching to random walk behaviour.");
-
 			this.getDataStore().put("default_movement_behaviour", ExplorationAgent.RANDOM_WALK);
 			this.getDataStore().put("movement_behaviour", ExplorationAgent.RANDOM_WALK);
 			return;
-
 		}
 
 		String nextNode;
@@ -51,6 +50,7 @@ public class Exploration extends SimpleBehaviour {
 			nextNode = plan.get(plan.size()-1);
 			this.agent.log("Path : " + plan);
 		} else {
+			this.agent.log("Computing plan");
 			this.agent.computePlan(myPosition);
 			plan = this.agent.getPlan();
 			nextNode = plan.get(plan.size() - 1);
@@ -58,13 +58,19 @@ public class Exploration extends SimpleBehaviour {
 		this.agent.log("Next node is :" + nextNode);
 
 		this.transitionId = T_CHECK_VOICEMAIL;
-		block(200);
+		block(500);
 
+		// If already one goal node, no need to move.
+		if(plan.get(plan.size()-1).equals(myPosition)) return;
+		
 		// Move to the picked location. The move action (if any) MUST be the last action of your behaviour
-		if(!this.agent.moveTo(nextNode)) {
+		if(!this.agent.moveTo(nextNode)) {	
 			// obstacle, engage communication.
+			this.agent.log("Blocked");
 			this.getDataStore().put("exploration_blocked_notification", true);
 		}
+		this.agent.log("Moved to next node: "+ this.agent.getCurrentPosition());
+		System.out.println();
 	}
 
 	@Override

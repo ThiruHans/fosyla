@@ -39,7 +39,6 @@ public class AgentP extends abstractAgent {
 
     protected void setup() {
         super.setup();
-
         //get the parameters given into the object[]. In the current case, the environment where the agent will evolve
         final Object[] args = getArguments();
         if(args[0]!=null && args[1]!=null){
@@ -88,9 +87,11 @@ public class AgentP extends abstractAgent {
 
     @SuppressWarnings("unchecked")
     public void updateMap() {
+    	this.log("Updating map");
         String myPosition = this.getCurrentPosition();
         //List of observable from the agent's current position
         List<Couple<String,List<Attribute>>> lobs = this.observe();
+        this.log(""+ lobs);
 
         // Add current position to map if not contained already.
         if(!map.containsKey(myPosition)) {
@@ -99,11 +100,6 @@ public class AgentP extends abstractAgent {
         // Remove current position from openedNodes
         openedNodes.remove(myPosition);
         // Remove point of interest
-        // TODO: only update
-        if (goalPoi != null && goalPoi.getNode().equals(myPosition)) {
-        	pois.remove(goalPoi);
-        	goalPoi = null;
-        }
 
         HashSet<String> currentPositionNeighbors = map.get(myPosition);
         // For each discovered node
@@ -135,13 +131,32 @@ public class AgentP extends abstractAgent {
             		if (!attr.getName().equals("Stench")) filteredAttrs.add(attr);
             	}
             	if (!filteredAttrs.isEmpty()) {
-            		pois.add(new PointOfInterest(node, filteredAttrs, this.getTick()));
+            		boolean exists = false;
+            		for (PointOfInterest p: pois){
+            			if(p.getNode().equals(node)){
+            				exists = true;
+            				p.update(filteredAttrs, this.getTick());
+            				break;
+            			}
+            		}
+            		if(!exists){
+            			pois.add(new PointOfInterest(node, filteredAttrs, this.getTick()));
+            		}
+            	} else {
+            		for (PointOfInterest p : pois) {
+            			if(p.getNode().equals(node)) {
+            				pois.remove(p);
+            				break;
+            			}
+            		}
             	}
             }
+            
             if (!this.map.containsKey(node)) {
                 this.openedNodes.add(node);
             }
         }
+        this.showPoi();
     }
 
     public void computePlan(String position) {
@@ -174,15 +189,38 @@ public class AgentP extends abstractAgent {
     }
     public void log(String s) {
         String myPosition = this.getCurrentPosition();
-        System.out.println("["+this.getLocalName()+" @ "+myPosition+ " /" +this.tick +"] " + s);
+        System.out.println("["+this.getLocalName()+" @ "+myPosition+ " /" +this.tick +"|mvmt="
+        		+this.dataStore.get("movement_behaviour")+"] " + s);
     }
 
     public List<String> getPlan() {
         return this.currentPlan;
     }
+    public void resetPlan() {
+    	this.currentPlan = null;
+    }
     public void tick() {
         this.tick += 1;
     }
-    private int getTick() {return this.tick;}
+    protected int getTick() {return this.tick;}
     public void kill() { this.takeDown();}
+    
+    public EntityType getType(){
+    	return type;
+    }
+    
+    public void showPoi(){
+    	System.out.print("Points of interests: ");
+    	for(PointOfInterest p: this.pois){
+    		p.log(", ");
+    	}
+    	System.out.println();
+    }
+    
+    public PointOfInterest getGoalPoi(){
+    	return this.goalPoi;
+    }
+    public void resetGoalPoi() {
+    	this.goalPoi = null;
+    }
 }

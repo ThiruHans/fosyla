@@ -18,6 +18,7 @@ import mas.behaviours.SendGoal;
 import mas.behaviours.WaitForStandby;
 import utils.PointOfInterest;
 import env.Attribute;
+import env.Couple;
 
 public class CollectorAgent extends AgentP{
 
@@ -30,8 +31,8 @@ public class CollectorAgent extends AgentP{
 		// Initialize state
 		// The exploration agent provides a `dataStore` to some behaviors to allow the passing of data between state
 		// in the FSM.
-		DataStore dataStore = new DataStore();
 		dataStore.put("exploration_blocked_notification", false);
+		dataStore.put("tresor_found_notification", false);
 		dataStore.put("recipients_for_sharing", new ArrayList<>());
 		dataStore.put("movement_behaviour", CollectorAgent.T_EXPLORE);
 		dataStore.put("default_movement_behaviour", CollectorAgent.T_EXPLORE);
@@ -99,22 +100,25 @@ public class CollectorAgent extends AgentP{
 	
 	@Override
     public void computePlan(String position) {
+		
+		
         String goal = "";
         PointOfInterest bestpoi = null;
         int maxValue = Integer.MIN_VALUE;
         String agentTreasureType = this.getMyTreasureType();
         if (!this.pois.isEmpty()){
         	for(PointOfInterest p: pois){
-        		for(Attribute attr: p.getAttrs()){
-        			if(attr.getName().equals(agentTreasureType) && (int) attr.getValue() > maxValue){
+        		for(Couple<String, Integer> attr: p.getAttrs()){
+        			if(attr.getLeft().equals(agentTreasureType) && (int) attr.getRight() > maxValue){
         				bestpoi = p;
-        				maxValue = (int) attr.getValue();
+        				maxValue = attr.getRight();
         			}
         		}
         	}
-        	
         }
+        
         if(bestpoi == null){
+        	this.log("bestpoi = null");
     		if (!openedNodes.isEmpty()) {
     			goal = openedNodes.get(openedNodes.size()-1);
     			dataStore.put("movement_behaviour", AgentP.T_EXPLORE);
@@ -124,7 +128,9 @@ public class CollectorAgent extends AgentP{
     			dataStore.put("default_movement_behaviour", AgentP.COLLECTION);
     		}
     	} else {
+    		this.log("bestpoi = "+ bestpoi.getNode());
     		goal = bestpoi.getNode();
+    		this.goalPoi = bestpoi;
     		dataStore.put("movement_behaviour", AgentP.COLLECTION);
 			dataStore.put("default_movement_behaviour", AgentP.COLLECTION);
     	}
@@ -137,9 +143,21 @@ public class CollectorAgent extends AgentP{
         // Compute shortest path to goal with Dijkstra:
         this.dijkstra.computeShortestPaths(position);
         this.log("New goal : " + goal + ". Currently opened:" + openedNodes + ". NDiscovered="+map.size());
+//        for (PointOfInterest p: this.pois){
+//        	System.out.println(p.getNode());
+//        }
         this.currentPlan = this.dijkstra.getPath(position, goal);
         this.log("Path : " + this.currentPlan);
 //		this.log("MAP:" + map);
     }
+	
+	@Override
+	public void log(String s) {
+		String myPosition = this.getCurrentPosition();
+        System.out.println("["+this.getLocalName()+" @ "+myPosition+ " /" 
+		+this.getTick() + "|"+this.getBackPackFreeSpace() +"|mvmt="
+        		+this.dataStore.get("movement_behaviour")+"] " + s);
+	}
+
 
 }
