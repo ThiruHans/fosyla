@@ -1,54 +1,80 @@
 package utils;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import env.Attribute;
 import env.Couple;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class PointOfInterest implements Serializable {
 
     private String node;
-    private List<Couple<String,Integer>> attrs;
-    private int lastUpdatedDate;
+    private List<Couple<String, Integer>> attributes;
+    private Date date;
 
-    public PointOfInterest(String node, List<Attribute> attrs, int date) {
+    public PointOfInterest(String node, List<Attribute> attributes, Date date) {
         this.node = node;
-        this.attrs = new ArrayList<>();
-        for(Attribute attr:attrs){
-        	Couple<String,Integer> c = new Couple<>(attr.getName(),(Integer)attr.getValue());
-        	this.attrs.add(c);
-        }
-        this.lastUpdatedDate = date;
+        this.date = date;
+        this.attributes = new ArrayList<>();
+        this.updateAttributes(attributes);
     }
 
-    public List<Couple<String,Integer>> getAttrs() {
-        return attrs;
+    public void update(List<Attribute> attributes, Date date) {
+        this.attributes.clear();
+        this.updateAttributes(attributes);
+        this.date = date;
     }
 
-    public int getLastUpdatedDate() {
-        return this.lastUpdatedDate;
+    public void update(PointOfInterest p) {
+        this.attributes = p.getAttributes();
+        this.date = p.getDate();
     }
 
     public String getNode() {
         return this.node;
     }
-    
-    public void log(String s){
-    	System.out.print("["+ this.getNode() +" : "+ this.getAttrs() +"|"+this.lastUpdatedDate+" ]" + s);
+
+    public List<Couple<String, Integer>> getAttributes() {
+        return attributes;
     }
 
-    public void update(List<Attribute> attrs, int date) {
-    	this.attrs.clear();
-    	for(Attribute attr:attrs){
-        	Couple<String,Integer> c = new Couple<>(attr.getName(),(Integer)attr.getValue());
-        	this.attrs.add(c);
-        }
-    	this.lastUpdatedDate = date;
+    public Date getDate() {
+        return date;
     }
-    
+
+    private void updateAttributes(List<Attribute> attributes) {
+        for (Attribute attr : attributes) {
+            this.attributes.add(
+                    new Couple<>(attr.getName(), (int)attr.getValue()));
+        }
+    }
+
+    public boolean equals(PointOfInterest other) {
+        return this.getNode().equals(other.getNode());
+    }
+
     public String toString() {
-    	return "["+this.node+":"+this.attrs+"|"+this.lastUpdatedDate+"]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        builder.append(this.node);
+        builder.append("::");
+        for (int i = 0; i < this.attributes.size(); i++) {
+            Couple<String, Integer> attr = this.attributes.get(i);
+            builder.append(attr.getLeft());
+            builder.append(":");
+            builder.append(attr.getRight());
+            if (i != this.attributes.size()-1) builder.append(", ");
+        }
+        builder.append("|");
+        builder.append(this.date.getTime());
+        builder.append(")");
+        return builder.toString();
+    }
+
+    public void markObsolete(Date date) {
+        this.attributes.clear();
+        this.date = date;
     }
 }

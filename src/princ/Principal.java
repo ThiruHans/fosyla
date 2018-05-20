@@ -24,20 +24,21 @@ import env.Environment.ENVtype;
 
 public class Principal {
 
-	private static String hostname = "127.0.0.1";
+	private static String hostname = "127.0.0.1"; 
 	private static HashMap<String, ContainerController> containerList=new HashMap<String, ContainerController>();// container's name - container's ref
 	private static List<AgentController> agentList;// agents's ref
-	private static Runtime rt;
+	private static Runtime rt;	
 
 	private static Environment env;// static ref of the real environment
 
 	public static void main(String[] args){
 
-		System.out.println("Hello !");
 		//0) Create the real environment and the observed one
-		env= new Environment(ENVtype.GRID_T,5,null);
-		//env= new Environment(ENVtype.DOROGOVTSEV_T,15,null);
-		//env=new Environment("ressources/map2017-2","ressources/map2017-config");
+//		env= new Environment(ENVtype.GRID_T,6,null);
+//		env= new Environment(ENVtype.DOROGOVTSEV_T,130,null);
+// 		env= new Environment(ENVtype.DOROGOVTSEV,30,null);
+		env=new Environment("ressources/map2017-2","ressources/map2017-config-2");
+//		env=new Environment("ressources/map_test","ressources/map_test-config");
 
 		//1), create the platform (Main container (DF+AMS) + containers + monitoring agents : RMA and SNIFFER)
 		rt=emptyPlatform(containerList);
@@ -51,16 +52,9 @@ public class Principal {
 	}
 
 
-
-	/**********************************************
-	 *
-	 * Methods used to create an empty platform
-	 *
-	 **********************************************/
-
 	/**
 	 * Create an empty platform composed of 1 main container and 3 containers.
-	 *
+	 * 
 	 * @return a ref to the platform and update the containerList
 	 */
 	private static Runtime emptyPlatform(HashMap<String, ContainerController> containerList){
@@ -75,8 +69,8 @@ public class Principal {
 		// 2) create the containers
 		containerList.putAll(createContainers(rt));
 
-		// 3) create monitoring agents : rma agent, used to debug and monitor the platform; sniffer agent, to monitor communications;
-		createMonitoringAgents(mainContainerRef);
+		// 3) create monitoring agents : rma agent, used to debug and monitor the platform; sniffer agent, to monitor communications; 
+//		createMonitoringAgents(mainContainerRef);
 
 		System.out.println("Plaform ok");
 		return rt;
@@ -84,10 +78,10 @@ public class Principal {
 	}
 
 	/**
-	 * Create the containers used to hold the agents
+	 * Create the containers used to hold the agents 
 	 * @param rt The reference to the main container
 	 * @return an Hmap associating the name of a container and its object reference.
-	 *
+	 * 
 	 * note: there is a smarter way to find a container with its name, but we go fast to the goal here. Cf jade's doc.
 	 */
 	private static HashMap<String,ContainerController> createContainers(Runtime rt) {
@@ -99,21 +93,21 @@ public class Principal {
 
 		System.out.println("Launching containers ...");
 
-		//create the container0
+		//create the container0	
 		containerName="container0";
 		pContainer = new ProfileImpl(null, 8888, null);
 		System.out.println("Launching container "+pContainer);
 		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
 		containerList.put(containerName, containerRef);
 
-		//create the container1
+		//create the container1	
 		containerName="container1";
 		pContainer = new ProfileImpl(null, 8888, null);
 		System.out.println("Launching container "+pContainer);
 		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
 		containerList.put(containerName, containerRef);
 
-		//create the container2
+		//create the container2	
 		containerName="container2";
 		pContainer = new ProfileImpl(null, 8888, null);
 		System.out.println("Launching container "+pContainer);
@@ -156,7 +150,7 @@ public class Principal {
 			e.printStackTrace();
 			System.out.println("launching of sniffer agent failed");
 
-		}
+		}		
 
 
 	}
@@ -164,9 +158,9 @@ public class Principal {
 
 
 	/**********************************************
-	 *
+	 * 
 	 * Methods used to create the agents and to start them
-	 *
+	 * 
 	 **********************************************/
 
 
@@ -180,7 +174,7 @@ public class Principal {
 		System.out.println("Launching agents...");
 		ContainerController c;
 		String agentName;
-		List<AgentController> agentList=new ArrayList<>();
+		List<AgentController> agentList=new ArrayList<AgentController>();
 
 
 		/*
@@ -188,44 +182,55 @@ public class Principal {
 		 */
 
 		//	wumpus on container0
-//		c = containerList.get("container0");
-//		agentName="Golem";
-//		try {
-//			Object[] objtab=new Object[]{env};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,DummyWumpusShift.class.getName(),objtab);
-//			agentList.add(ag);
-//			System.out.println(agentName+" launched");
-//		} catch (StaleProxyException e) {
-//			e.printStackTrace();
-//		}
-//
-//		//	Explorer (no backpack)
-//		c = containerList.get("container0");
-//		agentName="Explorer1";
-//		try {
-//
-//			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,ExplorationAgent.class.getName(),objtab);
-//			agentList.add(ag);
-//			System.out.println(agentName+" launched");
-//		} catch (StaleProxyException e) {
-//			e.printStackTrace();
-//		}
-//
-//		//Explorer (no backpack)
-//		c = containerList.get("container0");
-//		agentName="Explorer2";
-//		try {
-//
-//			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,ExplorationAgent.class.getName(),objtab);
-//			agentList.add(ag);
-//			System.out.println(agentName+" launched");
-//		} catch (StaleProxyException e) {
-//			e.printStackTrace();
-//		}
+		c = containerList.get("container0");
+		agentName="Golem";
+		try {
+			Object[] objtab=new Object[]{env};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,Wumpus.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 
-		//Collector (backPack)
+//		//	Explorer (no backpack)
+		c = containerList.get("container0");
+		agentName="Explorer1";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExplorerAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+
+//		Explorer (no backpack)
+		c = containerList.get("container0");
+		agentName="Explorer2";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExplorerAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+////////////
+//		c = containerList.get("container0");
+//		agentName="Explorer3";
+//		try {
+//
+//			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+//			AgentController	ag=c.createNewAgent(agentName,ExplorerAgent.class.getName(),objtab);
+//			agentList.add(ag);
+//			System.out.println(agentName+" launched");
+//		} catch (StaleProxyException e) {
+//			e.printStackTrace();
+//		}
+////
 		c = containerList.get("container0");
 		agentName="Collector1";
 		try {
@@ -237,8 +242,21 @@ public class Principal {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
-//
-//		//Collector (backPack)
+		
+		//Collector (backPack)
+		c = containerList.get("container0");
+		agentName="Collector2";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,CollectorAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+
+		//Collector (backPack)
 //		c = containerList.get("container0");
 //		agentName="Agent4";
 //		try {
@@ -250,19 +268,19 @@ public class Principal {
 //		} catch (StaleProxyException e) {
 //			e.printStackTrace();
 //		}
-//
-//		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
-//		c = containerList.get("container0");
-//		agentName="Agent5";
-//		try {
-//
-//			Object[] objtab=new Object[]{env,EntityType.AGENT_TANKER};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,DummyTankerAgent.class.getName(),objtab);
-//			agentList.add(ag);
-//			System.out.println(agentName+" launched");
-//		} catch (StaleProxyException e) {
-//			e.printStackTrace();
-//		}
+
+		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
+		c = containerList.get("container0");
+		agentName="Tanker";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_TANKER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,TankerAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 
 
 

@@ -27,7 +27,7 @@ public class TestCreateGraphGS {
 		//color of a node according to its type
 		String defaultNodeStyle= "node {"+"fill-color: black;"+" size-mode:fit;text-alignment:under; text-size:14;text-color:white;text-background-mode:rounded-box;text-background-color:black;}";
 		String nodeStyle_wumpus= "node.wumpus {"+"fill-color: red;"+"}";
-		String nodeStyle_agent= "node.agent {"+"fill-color: blue;"+"}";
+		String nodeStyle_agent= "node.agent {"+"fill-color: forestgreen;"+"}";
 		String nodeStyle_treasure="node.treasure {"+"fill-color: yellow;"+"}";
 		String nodeStyle_EntryExit="node.exit {"+"fill-color: green;"+"}";
 		
@@ -47,7 +47,7 @@ public class TestCreateGraphGS {
 		// the nodes can be added dynamically.
 		graph.addNode("A");
 		Node n= graph.getNode("A");
-		n.addAttribute("ui.label", "agent");	
+		n.addAttribute("ui.label", "Agent J");	
 		n.setAttribute("ui.class", "agent");
 		
 		Object o=n.getAttribute("ui.label");

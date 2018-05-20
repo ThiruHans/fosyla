@@ -1,69 +1,72 @@
 package mas.behaviours;
 
 import jade.core.AID;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import mas.agents.AgentP;
+import mas.agents.Agent;
 
 import java.util.List;
 
-public class CheckVoiceMail extends SimpleBehaviour {
+public class CheckVoiceMail extends ABehaviour {
+    private int transition;
 
-	private static final long serialVersionUID = 8991919761504652388L;
-	private int transitionId = 0;
-	private AgentP agent;
+    public CheckVoiceMail(Agent agent) {
+        super(agent);
+    }
 
-	public static final int T_REQUEST_STANDBY = 10;
-	public static final int T_SEND_DATA = 11;
+    @Override
+    @SuppressWarnings("unchecked")
+    public void action() {
+        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+        ACLMessage msg = this.agent.receive(mt);
 
-	public CheckVoiceMail(AgentP agentP) {
-		super(agentP);
-		this.agent = agentP;
-	}
+        Boolean blockedState = (boolean) this.getDataStore().get("block_notification");
+//        if (blockedState) {
+//            this.getDataStore().put("block_number", (int)this.getDataStore().get("block_number")+1);
+//            if ((int)(this.getDataStore().get("block_number")) >= 2) {
+//                this.agent.log("Blocked two times on same node");
+//                this.getDataStore().put("walk_to_random", true);
+//                this.getDataStore().put("walk_to_random_max_steps", 1);
+//                this.transition = this.agent.getMovementBehaviour();
+//                return;
+//            }
+//        }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public void action() {
-		final MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-		final ACLMessage msg = this.agent.receive(mt);
+        if (msg != null) {
+            List<AID> recipientsList = (List<AID>)
+                    this.getDataStore().get("recipients_for_sharing");
+            recipientsList.add(msg.getSender());
 
-		if (msg != null) {
-			// Add sender to agent recipients to share data in SendData behaviour.
-			List<AID> recipientsList = (List<AID>)this.getDataStore().get("recipients_for_sharing");
-			recipientsList.add(msg.getSender());
+            this.agent.log("Message received in voice mail from: "
+                    + msg.getSender().getLocalName());
+            ACLMessage ack = new ACLMessage(ACLMessage.CONFIRM);
+            ack.addReceiver(msg.getSender());
+            ack.setSender(this.agent.getAID());
+            this.agent.sendMessage(ack);
 
-			agent.log("Message received in voice mail from: "+ msg.getSender());
-			// Send acknowledgement to sender
-			ACLMessage ack = new ACLMessage(ACLMessage.CONFIRM);
-			ack.addReceiver(msg.getSender());
-			ack.setSender(agent.getAID());
-			agent.sendMessage(ack);
+            this.transition = Agent.A_SEND_DATA;
 
-			// Switch to SendData behaviour
-			this.transitionId = T_SEND_DATA;
-		} else {
-			// If no message was received and the agent checked the voicemail because of collision:
-			// RequestStandby to nearby agents.
-			Boolean blockedState = (boolean)this.getDataStore().get("exploration_blocked_notification");
-			if (blockedState) {
-				agent.log("No message was received but the agent was blocked.");
-				this.transitionId = T_REQUEST_STANDBY;
-				this.getDataStore().put("exploration_blocked_notification", false);
-				return;
-			}
-			// Otherwise, just go back to previous movement behaviour
-			this.transitionId = (int) this.getDataStore().get("movement_behaviour");
-		}
-	}
+            // Empty voice mail
+            while (this.agent.receive(mt) != null);
+            return;
+        }
 
-	@Override
-	public boolean done() {
-		return this.transitionId != 0;
-	}
-	
-	public int onEnd() {
-		return this.transitionId;
-	}
+        if (blockedState) {
+            this.agent.log("No message was received but the agent was blocked.");
+            this.transition = Agent.A_REQUEST_STANDBY;
+            return;
+        }
+        // If no event, go back to default function
+        this.transition = this.agent.getMovementBehaviour();
+    }
 
+    @Override
+    public boolean done() {
+        return true;
+    }
+
+    public int onEnd() {
+        this.getDataStore().put("block_notification", false);
+        return transition;
+    }
 }
