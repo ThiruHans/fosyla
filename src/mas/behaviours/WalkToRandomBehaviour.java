@@ -24,6 +24,7 @@ public class WalkToRandomBehaviour extends ABehaviour {
             this.agent.log("Walk to random: step=" + this.step
                     + ", max_steps="+this.getDataStore().get("walk_to_random_max_steps"));
             if (this.step >= (int)this.getDataStore().get("walk_to_random_max_steps")) {
+                this.step = 0;
                 this.getDataStore().put("walk_to_random", false);
                 this.getDataStore().put("walk_to_random_max_steps", 0);
                 return;
@@ -52,7 +53,6 @@ public class WalkToRandomBehaviour extends ABehaviour {
     }
 
     public int onEnd() {
-        this.step = 0;
         return Agent.A_CHECK_VOICEMAIL;
     }
 }

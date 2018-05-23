@@ -15,11 +15,17 @@ import utils.PointOfInterest;
 public class CollectorAgent extends Agent {
 
     private String tankerName;
+    private int timeSinceEmpty;
+    private int maxCapacity;
+
+    private static final int TIME_BEFORE_EMPTY = 30;
 
     protected void setup() {
         super.setup();
 
         tankerName = null;
+        timeSinceEmpty = 0;
+        maxCapacity = this.getBackPackFreeSpace();
         this.setTankerName();
 
         strategies.put(M_COLLECT, new CollectionStrategy(this));
@@ -76,6 +82,10 @@ public class CollectorAgent extends Agent {
             return M_MOVE_TO_TANKER;
         }
 
+        if (this.timeSinceEmpty >= TIME_BEFORE_EMPTY) {
+            return M_MOVE_TO_TANKER;
+        }
+
         if (this.findRelevantPoint() == null) {
             if (this.openedNodes.isEmpty()) {
 //                this.dataStore.put("walk_to_random", true);
@@ -91,25 +101,42 @@ public class CollectorAgent extends Agent {
 
     public PointOfInterest findRelevantPoint() {
         int maxValue = -1;
+        int bestValue = -1;
+        int capacity = this.getBackPackFreeSpace();
         String treasureType = this.getMyTreasureType();
+        PointOfInterest maxPoi = null;
         PointOfInterest bestPoi = null;
         for (PointOfInterest p : this.points) {
             for (Couple<String, Integer> attr : p.getAttributes()) {
-                if (attr.getLeft().equals(treasureType)
-                        && maxValue < attr.getRight()) {
-                    maxValue = attr.getRight();
-                    bestPoi = p;
+                if (attr.getLeft().equals(treasureType)) {
+                    if (maxValue < attr.getRight()) {
+                        maxValue = attr.getRight();
+                        maxPoi = p;
+                    }
+                    if (bestValue < attr.getRight() && attr.getRight() <= maxCapacity) {
+                        bestValue = attr.getRight();
+                        bestPoi = p;
+                    }
                 }
+
             }
         }
-
-        System.out.println(this.getLocalName() + " Best poi = " + bestPoi);
-        return bestPoi;
+        if (bestPoi == null) return maxPoi;
+        else {
+            if (bestValue > capacity) {
+                // force emptying to tank
+                timeSinceEmpty += TIME_BEFORE_EMPTY;
+            }
+            return bestPoi;
+        }
     }
 
     @Override
     public void move(String nextNode) {
-        this.emptyMyBackPack(tankerName);
+        this.timeSinceEmpty++;
+        if(this.emptyMyBackPack(tankerName)) {
+            this.timeSinceEmpty = 0;
+        }
         super.move(nextNode);
     }
 

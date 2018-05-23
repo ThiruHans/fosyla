@@ -16,8 +16,9 @@ public class MoveToTankerBehaviour extends ABehaviour{
         this.agent.updateMap();
 
         if (this.getDataStore().get("tanker_position") == null) {
-            this.getDataStore().put("random_walk", true);
-            this.getDataStore().put("random_walk_max_steps", 1);
+            System.out.println("==============================================================================================================");
+            this.getDataStore().put("walk_to_random", true);
+            this.getDataStore().put("walk_to_random_max_steps", 1);
             return;
         }
 
