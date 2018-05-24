@@ -23,35 +23,7 @@ public class ExplorerAgent extends Agent {
 
     @Override
     public int getMovementBehaviour() {
-//        if ((boolean) this.dataStore.get("random_walk"))
-//            return M_RANDOM_WALK;
-//
-//        if ((boolean) this.dataStore.get("avoiding_conflict"))
-//            return M_AVOID_CONFLICT;
-//
-//        if ((boolean) this.dataStore.get("walk_to_random"))
-//            return M_WALK_TO_RANDOM;
-//
-//        if (this.openedNodes.isEmpty()) {
-//            if (this.points.isEmpty()) {
-//                this.dataStore.put("random_walk_max_steps", 1);
-//                return M_RANDOM_WALK;
-//            } else {
-//                if (this.dataStore.get("updater_name").equals(this.getLocalName())
-//                        && this.getPoints().size() > 1) {
-//                    return M_UPDATE_POI;
-////                    this.dataStore.put("walk_to_random_max_steps", 5);
-////                    return M_WALK_TO_RANDOM;
-//                } else {
-////                    this.dataStore.put("walk_to_random_max_steps", 5);
-//                    this.dataStore.put("random_walk_max_steps", 1);
-//                    return M_RANDOM_WALK;
-////                    return M_WALK_TO_RANDOM;
-//                }
-//            }
-//        }
-//        else
-//            return M_EXPLORE;
+
         if ((boolean) this.dataStore.get("random_walk"))
             return M_RANDOM_WALK;
 
@@ -69,10 +41,14 @@ public class ExplorerAgent extends Agent {
                 if (this.dataStore.get("updater_name").equals(this.getLocalName())) {
                     return M_UPDATE_POI;
                 } else {
-                    this.dataStore.put("walk_to_random", true);
-                    this.dataStore.put("walk_to_random_max_steps", 1);
+                    this.openedNodes.add(this.getCurrentPosition());
+                    this.closedNodes.clear();
+                    return M_EXPLORE;
+//                    return M_EXPLORE;
+//                    this.dataStore.put("walk_to_random", true);
+//                    this.dataStore.put("walk_to_random_max_steps", 1);
 //                    return M_RANDOM_WALK;
-                    return M_WALK_TO_RANDOM;
+//                    return M_WALK_TO_RANDOM;
                 }
             }
         } else {

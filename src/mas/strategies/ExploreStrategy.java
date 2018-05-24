@@ -2,6 +2,8 @@ package mas.strategies;
 
 import mas.agents.Agent;
 
+import java.util.List;
+
 public class ExploreStrategy extends Strategy {
 
     public ExploreStrategy(Agent agent) {
@@ -15,11 +17,19 @@ public class ExploreStrategy extends Strategy {
             return;
         }
         this.agent.log("Opened nodes: " + this.agent.getOpenedNodes());
-        String dest = null;
+        String position = this.agent.getCurrentPosition();
+        this.agent.dijkstra.computeShortestPaths(position);
+
+        int minLength = Integer.MAX_VALUE;
+        List<String> bestPlan = null;
+        // find closest opened node.
         for(String node : this.agent.getOpenedNodes()){
-            dest=node;
-            break;
+            List<String> plan = this.agent.dijkstra.getPath(position, node);
+            if(plan.size() < minLength) {
+                bestPlan = plan;
+                minLength = plan.size();
+            }
         }
-        this.agent.setNewDestination(dest);
+        this.agent.setPlan(bestPlan);
     }
 }

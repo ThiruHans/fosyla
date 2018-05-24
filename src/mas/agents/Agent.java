@@ -42,9 +42,10 @@ public abstract class Agent extends abstractAgent {
     // All agent data
     protected HashMap<String, HashSet<String>> map;
     protected HashSet<String> openedNodes;
+    protected HashSet<String> closedNodes;
     protected List<String> currentPlan;
     protected List<PointOfInterest> points;
-    protected Dijkstra dijkstra;
+    public Dijkstra dijkstra;
     protected Random random;
     protected EntityType type;
     protected DataStore dataStore;
@@ -70,6 +71,7 @@ public abstract class Agent extends abstractAgent {
         // Init agent data
         this.map = new HashMap<>();
         this.openedNodes = new HashSet<>();
+        this.closedNodes = new HashSet<>();
         this.points = new ArrayList<>();
         this.dijkstra = new Dijkstra(this.map);
         this.random = new Random();
@@ -179,6 +181,7 @@ public abstract class Agent extends abstractAgent {
         }
         // Remove current position from openedNodes.
         this.openedNodes.remove(position);
+        this.closedNodes.add(position);
 
         // Update map edges and points of interest.
         Set<String> currentPositionNeighbors = this.map.get(position);
@@ -186,12 +189,16 @@ public abstract class Agent extends abstractAgent {
             String node = c.getLeft();
             List<Attribute> attributes = c.getRight();
 
+            // update openedNodes
+            if (!this.closedNodes.contains(node)) {
+                this.openedNodes.add(node);
+            }
+
             // Map edges.
             HashSet<String> nodeNeighbors;
             if (!this.map.containsKey(node)) {
                 nodeNeighbors = new HashSet<>();
                 this.map.put(node, nodeNeighbors);
-                this.openedNodes.add(node);
             } else {
                 nodeNeighbors = this.map.get(node);
             }
@@ -354,7 +361,11 @@ public abstract class Agent extends abstractAgent {
             this.dataStore.put("block_notification", true);
             String lastBlockPosition = (String)this.dataStore.get("last_block_position");
             if (position.equals(lastBlockPosition)) {
-                this.log("Agent was blocked more than once on the same node. Random walk");
+                this.log("Agent was blocked more than once on the same node. Walk to random");
+//                this.dataStore.put("walk_to_random", true);
+//                this.dataStore.put("walk_to_random_max_steps", 1);
+//                this.setNewDestination(null);
+//                this.emptyMessages();
                 this.dataStore.put("random_walk", true);
                 this.dataStore.put("random_walk_max_steps", 5);
             }
