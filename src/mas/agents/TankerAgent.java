@@ -5,6 +5,9 @@ import mas.behaviours.WaitForCollectorsBehaviour;
 import mas.strategies.MoveToTankerPosTankerStrategy;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TankerAgent extends Agent {
 
@@ -43,21 +46,47 @@ public class TankerAgent extends Agent {
             return M_WAIT_FOR_COLLECTORS;
     }
 
+    private String getMaxForBetweenness() {
+        HashMap<String, Integer> degrees = new HashMap<>();
+        for (String s : this.map.keySet()) {
+            this.dijkstra.computeShortestPaths(s);
+            for (String t : this.map.keySet()) {
+                if (!s.equals(t)) {
+                    List<String> path = this.dijkstra.getPath(s, t);
+                    for (String v : path) {
+                        degrees.put(v, degrees.getOrDefault(v, 0) + 1);
+                    }
+                }
+            }
+        }
+
+        int max = -1;
+        String center = null;
+        for (Map.Entry<String, Integer> node : degrees.entrySet()) {
+            if (node.getValue() > max) {
+                max = node.getValue();
+                center = node.getKey();
+            }
+        }
+        return center;
+    }
+
     @Override
     public void newDataReceived(DataStore data) {
         super.newDataReceived(data);
 
         // Determine tanker position
         // 1. find appropriate node
-        String tanker_position = null;
-        int max_deg = Integer.MIN_VALUE;
-        for (String node : this.map.keySet()) {
-            if (this.map.get(node).size() > max_deg) {
-                tanker_position = node;
-                max_deg = this.map.get(node).size();
-            }
-        }
-        if (tanker_position == null) tanker_position = this.getCurrentPosition();
+//        String tanker_position = null;
+//        int max_deg = Integer.MIN_VALUE;
+//        for (String node : this.map.keySet()) {
+//            if (this.map.get(node).size() > max_deg) {
+//                tanker_position = node;
+//                max_deg = this.map.get(node).size();
+//            }
+//        }
+//        if (tanker_position == null) tanker_position = this.getCurrentPosition();
+        String tanker_position = getMaxForBetweenness();
         // 2. set as new tanker_position
         this.getDataStore().put("tanker_position", tanker_position);
         this.getDataStore().put("tanker_position_date", new Date());
