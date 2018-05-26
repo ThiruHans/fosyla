@@ -45,6 +45,7 @@ public abstract class Agent extends abstractAgent {
     protected HashSet<String> closedNodes;
     protected List<String> currentPlan;
     protected List<PointOfInterest> points;
+    protected HashMap<String, Couple<String, Integer>> collectors;
     public Dijkstra dijkstra;
     protected Random random;
     protected EntityType type;
@@ -73,6 +74,7 @@ public abstract class Agent extends abstractAgent {
         this.openedNodes = new HashSet<>();
         this.closedNodes = new HashSet<>();
         this.points = new ArrayList<>();
+        this.collectors = new HashMap<>();
         this.dijkstra = new Dijkstra(this.map);
         this.random = new Random();
         this.dataStore = new DataStore();
@@ -311,6 +313,10 @@ public abstract class Agent extends abstractAgent {
         return destination;
     }
 
+    public HashMap<String, Couple<String, Integer>> getCollectors() {
+        return collectors;
+    }
+
     public Strategy getStrategy() {
         int code = this.getMovementBehaviour();
         return this.strategies.get(code);
@@ -332,6 +338,11 @@ public abstract class Agent extends abstractAgent {
             else map.put(e, otherMap.get(e));
 //            openedNodes.remove(e);
         }
+
+        // update collectors list
+        HashMap<String, Couple<String, Integer>> newCollectors =
+                ((HashMap<String, Couple<String, Integer>>)data.get("collectors"));
+        this.collectors.putAll(newCollectors);
 
         // if other agent stops exploring, delegate exploration of opened nodes.
         HashSet<String> otherOpenedNodes = (HashSet<String>) data.get("opened_nodes");
@@ -362,12 +373,12 @@ public abstract class Agent extends abstractAgent {
             String lastBlockPosition = (String)this.dataStore.get("last_block_position");
             if (position.equals(lastBlockPosition)) {
                 this.log("Agent was blocked more than once on the same node. Walk to random");
-//                this.dataStore.put("walk_to_random", true);
-//                this.dataStore.put("walk_to_random_max_steps", 1);
-//                this.setNewDestination(null);
-//                this.emptyMessages();
-                this.dataStore.put("random_walk", true);
-                this.dataStore.put("random_walk_max_steps", 5);
+                this.dataStore.put("walk_to_random", true);
+                this.dataStore.put("walk_to_random_max_steps", 1);
+                this.setNewDestination(null);
+                this.emptyMessages();
+//                this.dataStore.put("random_walk", true);
+//                this.dataStore.put("random_walk_max_steps", 5);
             }
             this.dataStore.put("last_block_position", position);
         }

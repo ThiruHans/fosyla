@@ -1,0 +1,79 @@
+%-----------------------------------------------
+% DOCUMENT PACKAGES
+%-----------------------------------------------
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage[margin=1.3in]{geometry}
+\usepackage{hyperref}
+\usepackage[french]{babel}
+\usepackage[small, sc, bf, center]{titlesec}
+\usepackage{listings}
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{cleveref}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{tkz-graph}
+\usepackage{csvsimple}
+%\usepackage{subcaption}
+%\usepackage{multicol}
+\usepackage{csquotes}
+%-----------------------------------------------
+% DOCUMENT CONFIG
+%-----------------------------------------------
+
+% Add point after title number
+\titleformat{\section}[block]{\sc\bfseries\center\large}{\thesection.}{0.5em}{}
+\titleformat{\subsection}[block]{\sc\bfseries\center}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}[block]{\sc\bfseries\center}{\thesubsubsection.}{0.5em}{}
+% Page number reformat
+\pagestyle{fancy}
+\fancyfoot[C]{--~\thepage~--}
+% Deactivate fancyhdr header
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead{}
+% tikz
+\tikzstyle{vertex}=[circle, draw, inner sep=0pt, minimum size=6pt]
+\newcommand{\vertex}{\node[vertex]}
+\usetikzlibrary{arrows,petri,topaths,calc}
+% listing style
+\lstset{
+frame=single,
+basicstyle=\ttfamily\small,
+numbers=left,
+%numbersep=5pt,
+%font=\ttfamily
+}
+
+%-----------------------------------------------
+% DOCUMENT BODY
+%-----------------------------------------------
+\begin{document}
+	
+\begin{center}
+	\textbf{Projet de FOSYMA\\[.5cm]Wumpus Multi-Agent}\\[.5cm]
+	\textit{Alexandre Bontems, Hans Thirunavukarasu}\\
+\end{center}
+
+\tableofcontents
+\section{Introduction}
+Une version multi-agent du jeu \textquote{Hunt the Wumpus} est implémentée dans ce projet. On y considère une carte de labyrinthe sous forme de graphe dans laquelle certains sommets présentent des trésors. Ceux-ci peuvent être de deux types, trésors ou diamants, et présents en une quantité prédéfinie. Les agents évoluent dans cette carte en s'y déplaçant: passer d'un sommet $v_1$ à un sommet $v_2$ n'est permis que si l'arête $(v_1, v_2)$ existe dans le graphe. De plus, chaque agent occupe un sommet du graphe à tout moment et plusieurs agents ne peuvent occuper un même sommet. Les déplacements sont donc susceptibles d'être bloqués si le sommet de destination est déjà occupé.
+
+Le but final du jeu est d'explorer entièrement le graphe et de récupérer tous les trésors qui s'y trouvent. Pour cela on dispose de plusieurs types d'agents : explorateurs, collecteurs et silo. Les explorateurs ont pour fonctions d'explorer la carte et de reporter la position des trésors. Les collecteurs possèdent un sac-à-dos pouvant contenir une certaine capacité d'un seul type de trésor et peuvent ramasser les trésors de ce type qui se trouvent à leur position. Enfin le silo possède une capacité illimitée pour tous les types de trésors et les collecteurs peuvent donc lui donner le contenu de leur sac-à-dos lorsqu'il est plein.
+
+Les choix d'implémentation et d'algorithmes sont détaillés comme suit. L'exploration est d'abord abordée, comportement susceptible d'être adopté par tout agent quelque soit sont type. Tous les thèmes liés à la coordination tels que les communications, la gestion des interblocages et le ramassage de trésor sont ensuite décrit.
+\section{Exploration}
+Le comportement d'exploration a été le premier à être implémenté en raison de son indispensabilité. En effet, tout autre comportement ne peut être fonctionnel que si l'environnement de l'agent est connu. C'est aussi le comportement par défaut de tous les agents lorsqu'ils n'ont pas d'objectif plus pressant. Au lancement de l'exécution par exemple, les collecteurs ne connaissent pas la position des trésors ni du silo et pour la découvrir on passe ainsi en mode d'exploration. Pour la même raison, le silo ne connaissant pas la position des autres agents se tourne d'abord vers une phase d'exploration.
+
+Puisque l'environnement est modélisé sous forme de graphe, il est naturel pour le parcourir entièrement de se tourner vers un comportement inspiré de Breadth First Search (BFS). Ainsi trois structures de données sont utilisées: premièrement, la carte est sauvée en tant que listes de voisins (\texttt{HashMap<String, HashSet<String>{}>} en java) et associe à chaque sommet ses voisins dans le graphe. Un ensemble de sommets ouverts est aussi maintenu: ce sont les sommets encore non explorés. Enfin un ensemble de sommets déjà explorés est gardé en mémoire.
+
+Chaque agent en mode d'exploration construit donc une carte en choisissant le sommet ouvert le plus proche et en l'ajoutant à la carte (lui et ses voisins)  lorsqu'il est atteint. Les chemins jusqu'à un sommet sont calculés par BFS depuis le sommet de départ et le sommet ouvert le plus proche est donc celui pour lequel le chemin est le plus court.
+\section{Coordination}
+\subsection{Communication}
+\subsection{Interblocage}
+\subsection{Ramassage de trésor}
+\section{Conclusion}
+
+\end{document}

@@ -29,9 +29,11 @@ public class SendDataBehaviour extends ABehaviour {
             messageContainer.put("tanker_position", this.getDataStore().get("tanker_position"));
             messageContainer.put("tanker_position_date", this.getDataStore().get("tanker_position_date"));
             messageContainer.put("type", this.agent.getType());
+            messageContainer.put("collectors", this.agent.getCollectors());
 
             if (this.agent.getType() != EntityType.AGENT_EXPLORER) {
                 messageContainer.put("opened_nodes", this.agent.getOpenedNodes());
+                this.agent.getOpenedNodes().clear();
             }
 
             msg.setContentObject(messageContainer);

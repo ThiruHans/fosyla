@@ -17,8 +17,6 @@ public class MoveToTankerBehaviour extends ABehaviour{
 
         if (this.getDataStore().get("tanker_position") == null) {
             System.out.println("==============================================================================================================");
-            this.getDataStore().put("walk_to_random", true);
-            this.getDataStore().put("walk_to_random_max_steps", 1);
             return;
         }
 

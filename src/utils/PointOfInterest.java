@@ -52,6 +52,7 @@ public class PointOfInterest implements Serializable {
     }
 
     public boolean equals(PointOfInterest other) {
+        if(other == null) return false;
         return this.getNode().equals(other.getNode());
     }
 

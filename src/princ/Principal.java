@@ -193,7 +193,7 @@ public class Principal {
 			e.printStackTrace();
 		}
 
-//		//	Explorer (no backpack)
+		//	Explorer (no backpack)
 		c = containerList.get("container0");
 		agentName="Explorer1";
 		try {

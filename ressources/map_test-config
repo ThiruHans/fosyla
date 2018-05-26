@@ -3,4 +3,5 @@ treasure:1:15
 treasure:15:17
 treasure:18:20
 agentTanker:Tanker:15:200:200
-agentCollect:Collector1:1:60:-1
+agentCollect:Collector1:1:30:-1
+agentCollect:Collector2:8:15:-1

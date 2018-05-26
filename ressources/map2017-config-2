@@ -4,11 +4,11 @@ treasure:42:17
 treasure:33:46
 treasure:6:6
 treasure:69:11
-diamonds:96:77
-diamonds:14:57
-diamonds:38:6
+treasure:96:77
+treasure:120:57
+treasure:38:6
 agentExplo:Explorer1:129:-1:-1
 agentExplo:Explorer2:130:-1:-1
 agentCollect:Collector1:98:40:-1
-agentCollect:Collector2:8:-1:35
+agentCollect:Collector2:8:35:-1
 agentTanker:Tanker:101:200:200

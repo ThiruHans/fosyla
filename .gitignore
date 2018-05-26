@@ -6,3 +6,23 @@ out/
 .idea/
 APDescription.txt
 MTPs-Main-Container.txt
+## latex
+*.acn
+*.aux
+*.fdb_latexmk
+*.fls
+*.glo
+*.ist
+*.log
+*.out
+*.synctex.gz
+*.synctex.gz(busy)
+*.toc
+*.sta
+*.pdf
+*.bbl
+*.blg
+*.dvi
+*.bcf
+*.run.xml
+!main.pdf
