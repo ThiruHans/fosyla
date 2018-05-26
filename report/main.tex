@@ -20,6 +20,7 @@
 %\usepackage{subcaption}
 %\usepackage{multicol}
 \usepackage{csquotes}
+\usepackage{tikz-uml}
 %-----------------------------------------------
 % DOCUMENT CONFIG
 %-----------------------------------------------
@@ -61,19 +62,70 @@ numbers=left,
 \section{Introduction}
 Une version multi-agent du jeu \textquote{Hunt the Wumpus} est implémentée dans ce projet. On y considère une carte de labyrinthe sous forme de graphe dans laquelle certains sommets présentent des trésors. Ceux-ci peuvent être de deux types, trésors ou diamants, et présents en une quantité prédéfinie. Les agents évoluent dans cette carte en s'y déplaçant: passer d'un sommet $v_1$ à un sommet $v_2$ n'est permis que si l'arête $(v_1, v_2)$ existe dans le graphe. De plus, chaque agent occupe un sommet du graphe à tout moment et plusieurs agents ne peuvent occuper un même sommet. Les déplacements sont donc susceptibles d'être bloqués si le sommet de destination est déjà occupé.
 
-Le but final du jeu est d'explorer entièrement le graphe et de récupérer tous les trésors qui s'y trouvent. Pour cela on dispose de plusieurs types d'agents : explorateurs, collecteurs et silo. Les explorateurs ont pour fonctions d'explorer la carte et de reporter la position des trésors. Les collecteurs possèdent un sac-à-dos pouvant contenir une certaine capacité d'un seul type de trésor et peuvent ramasser les trésors de ce type qui se trouvent à leur position. Enfin le silo possède une capacité illimitée pour tous les types de trésors et les collecteurs peuvent donc lui donner le contenu de leur sac-à-dos lorsqu'il est plein.
+Le but final du jeu est d'explorer entièrement le graphe et de récupérer tous les trésors qui s'y trouvent. Pour cela on dispose de plusieurs types d'agents : explorateurs, collecteurs et silo. Les explorateurs ont pour fonctions d'explorer la carte et de reporter la position des trésors. Les collecteurs possèdent un sac-à-dos pouvant contenir une certaine capacité d'un seul type de trésor et peuvent ramasser les trésors de ce type qui se trouvent à leur position. Le ramassage n'est pas parfait cependant puisqu'à chaque tentative un partie du trésor présent sur le sommet est perdue à jamais. Enfin le silo possède une capacité illimitée pour tous les types de trésors et les collecteurs peuvent donc lui donner le contenu de leur sac-à-dos lorsqu'il est plein.
 
-Les choix d'implémentation et d'algorithmes sont détaillés comme suit. L'exploration est d'abord abordée, comportement susceptible d'être adopté par tout agent quelque soit sont type. Tous les thèmes liés à la coordination tels que les communications, la gestion des interblocages et le ramassage de trésor sont ensuite décrit.
+Le \textit{wumpus}, un agent adverse, est lui aussi déployé dans la carte. Son déplacement est aléatoire mais il est capable de déplacer des trésors sur la carte et d'en réduire ainsi la quantité totale définitivement. Il est lui aussi sujet aux restrictions décrites ci-dessus.
+
+Dans ce rapport, l'exploration est d'abord abordée, comportement susceptible d'être adopté par tout agent quelque soit sont type. Tous les thèmes liés à la coordination tels que les communications, la gestion des interblocages et le ramassage de trésor sont ensuite décrit.
 \section{Exploration}
-Le comportement d'exploration a été le premier à être implémenté en raison de son indispensabilité. En effet, tout autre comportement ne peut être fonctionnel que si l'environnement de l'agent est connu. C'est aussi le comportement par défaut de tous les agents lorsqu'ils n'ont pas d'objectif plus pressant. Au lancement de l'exécution par exemple, les collecteurs ne connaissent pas la position des trésors ni du silo et pour la découvrir on passe ainsi en mode d'exploration. Pour la même raison, le silo ne connaissant pas la position des autres agents se tourne d'abord vers une phase d'exploration.
+Le comportement d'exploration a été le premier à être implémenté en raison de son indispensabilité. En effet, tout autre comportement ne peut être fonctionnel que si l'environnement de l'agent est connu. C'est aussi le comportement par défaut de tous les agents lorsqu'ils n'ont pas d'objectif plus pressant. Au lancement de l'exécution par exemple, les collecteurs ne connaissent pas les positions des trésors ni du silo et pour les découvrir on passe en mode d'exploration. Pour la même raison, le silo ne connaissant pas la position des autres agents, se tourne d'abord vers une phase d'exploration.
 
-Puisque l'environnement est modélisé sous forme de graphe, il est naturel pour le parcourir entièrement de se tourner vers un comportement inspiré de Breadth First Search (BFS). Ainsi trois structures de données sont utilisées: premièrement, la carte est sauvée en tant que listes de voisins (\texttt{HashMap<String, HashSet<String>{}>} en java) et associe à chaque sommet ses voisins dans le graphe. Un ensemble de sommets ouverts est aussi maintenu: ce sont les sommets encore non explorés. Enfin un ensemble de sommets déjà explorés est gardé en mémoire.
+Puisque l'environnement est modélisé sous forme de graphe, il est naturel pour le parcourir entièrement de se tourner vers un comportement inspiré de Breadth First Search (BFS). Ainsi trois structures de données sont utilisées: premièrement, la carte est sauvée en tant que listes de voisins (\texttt{HashMap<String, HashSet<String>{}>} en java) et associe à chaque sommet ses voisins dans le graphe. Un ensemble de sommets ouverts est aussi maintenu: ce sont les sommets encore non explorés. Enfin un ensemble de sommets déjà explorés est gardé en mémoire. Chaque agent en mode d'exploration construit donc une carte en choisissant le sommet ouvert le plus proche et en l'ajoutant à la carte (lui et ses voisins)  lorsqu'il est atteint. Les chemins jusqu'à un sommet sont calculés par BFS depuis le sommet de départ et le sommet ouvert le plus proche est donc celui pour lequel le chemin est le plus court. À chaque choix de sommet de destination on a donc une complexité de $O(n + m)$ pour le BFS et une carte de $n$ sommets et $m$ arêtes.
 
-Chaque agent en mode d'exploration construit donc une carte en choisissant le sommet ouvert le plus proche et en l'ajoutant à la carte (lui et ses voisins)  lorsqu'il est atteint. Les chemins jusqu'à un sommet sont calculés par BFS depuis le sommet de départ et le sommet ouvert le plus proche est donc celui pour lequel le chemin est le plus court.
+Lorsque l'exploration est finie, i.e. un agent n'a plus de sommets ouverts, les agents explorant ont plusieurs options. Tout d'abord, lors des phases de communication (voir \Cref{sec-comm}) les agents se mettent d'accord sur l'identité de l'explorateur dit de \textquote{mise à jour des points d'intérêts}. Cet agent aura pour mission, lorsqu'il a terminé son exploration, de se déplacer entre chaque sommet connu comme contenant un trésor afin d'avoir la représentation la plus récente possible de chaque trésor de la carte. Il lui sera ainsi possible lors des rencontres de partager cette information. Les autres agents quant à eux relancent une exploration complète de la carte en \textquote{oubliant} quels sommets ont déjà été visités. Cela est nécessaire puisque le \textit{wumpus} est capable de déplacer des trésors et il est donc important de repasser par tous les sommets pour détecter les nouveaux points d'intérêt. L'agent de mise à jour choisit donc le point d'intérêt le plus ancien, planifie un chemin pour s'y rendre et lorsque ce point est atteint passe au prochain point le plus ancien. Un comportement sensiblement plus intelligent serait de concentrer l'exploration dans le voisinage des points d'intérêt déjà connus car le \textit{wumpus} a seulement une faible portée de déplacement. Cependant, dans un soucis d'optimisation des interblocages et par manque de temps, ce comportement n'est pas implémenté.
+
+Lorsque deux agents se rencontrent les cartes peuvent être échangées et aucune vérification n'est nécessaire car la carte ne peut pas évoluer dans le temps. La liste des trésors cependant est changeante et c'est pourquoi à tout point d'intérêt est associée une date d'observation. Lors des communications les agents sont ainsi capables de comparer les dates et de distinguer l'observation la plus récente. Ils utilisent pour cela l'horloge système de la machine sur laquelle ils sont lancés.
 \section{Coordination}
+
+Qui dit simulation multi-agent dit calcul distribué et donc un besoin primordial de communication entre processus. Chaque agent est ainsi capable d'échanger des messages avec d'autres agents aux travers d'un réseau (ces messages utilisent la norme FIPA). Ces communications forment la fondation des différents comportements de coordination qui sont décrit par la suite.
+
 \subsection{Communication}
+\label{sec-comm}
+
+Pour pouvoir expliquer plus avant les communications inter-agent il est nécessaire d'introduire la machine à états qui les régit. Visible en~\Cref{fig-fsm}, la machine et ses transitions sont expliquées ici. On y voit que le premier état atteint est bien celui de l'exploration mais il est surtout important de pointer du doigt l'état central \textsf{CheckVoiceMail}. C'est grâce à lui que les agents sont capables de s'écouter et se parler. En effet après chaque mouvement, chacun vérifie dans sa boîte aux lettres qu'aucun message n'a été reçu.
+
+\begin{figure}[ht!]
+    \centering
+    \begin{tikzpicture}
+    \umlstateinitial[x=-2, name=initial]
+    \umlbasicstate[x=-2, y=-2.3, fill=red!20]{Explore}
+    \umlbasicstate[y=-6, fill=blue!20]{CheckVoiceMail}
+    \umlbasicstate[y=-6, x=4.4]{RequestStandby}
+    \umlbasicstate[y=-6, x=9]{WaitForStandby}
+    \umlbasicstate[x=-1, y=-10]{SendData}
+    \umlbasicstate[y=-10, x=2.5]{RcvData}
+    \umlbasicstate[y=-10, x=6]{SendGoal}
+    \umlbasicstate[y=-10, x=9.5]{RcvGoal}
+    \umlbasicstate[x=1.3, y=-2, fill=red!20]{AvoidConflict}
+    \umlbasicstate[x=5.1, y=-2, fill=red!20]{RandomWalk}
+    \umlbasicstate[x=9.3, y=-2, fill=red!20]{TypeSpecificMvmt}
+    
+    \umltrans{initial}{Explore}
+    \umlVHVtrans[anchors=south and 140]{Explore}{CheckVoiceMail}
+    \umlVHVtrans[anchors=140 and south]{CheckVoiceMail}{Explore}
+    \umltrans{CheckVoiceMail}{RequestStandby}
+    \umltrans{RequestStandby}{WaitForStandby}
+    \umlVHVtrans{WaitForStandby}{SendData}
+    \umlVHVtrans[anchors=north and 40, arm1=0.5cm]{WaitForStandby}{CheckVoiceMail}
+    \umlVHVtrans[anchor2=120, anchor1=-120, arm1=-0.5cm]{CheckVoiceMail}{SendData}
+    \umltrans{SendData}{RcvData}
+    \umltrans{RcvData}{SendGoal}
+    \umlVHVtrans[anchor2=-60, arm1=1.5cm]{RcvData}{CheckVoiceMail}
+    \umltrans{SendGoal}{RcvGoal}
+    \umlVHVtrans[anchor2=-40, arm1=2.5cm]{RcvGoal}{CheckVoiceMail}
+    \umlVHVtrans[anchors=-135 and 120, arm1=-0.4cm]{AvoidConflict}{CheckVoiceMail}
+    \umlVHVtrans[anchors=120 and -135, arm2=-0.4cm]{CheckVoiceMail}{AvoidConflict}
+    \umlVHVtrans[anchors=-135 and 100, arm1=-0.7cm]{RandomWalk}{CheckVoiceMail}
+    \umlVHVtrans[anchors=100 and -135, arm2=-0.7cm]{CheckVoiceMail}{RandomWalk}
+    \umlVHVtrans[anchors=-135 and 80, arm1=-1cm]{TypeSpecificMvmt}{CheckVoiceMail}
+    \umlVHVtrans[anchors=80 and -135, arm2=-1cm]{CheckVoiceMail}{TypeSpecificMvmt}
+    \end{tikzpicture}
+    \caption{Machine à états finie des agents.}
+    \label{fig-fsm}
+\end{figure}
 \subsection{Interblocage}
 \subsection{Ramassage de trésor}
+\subsection{Placement du Silo}
 \section{Conclusion}
 
 \end{document}
