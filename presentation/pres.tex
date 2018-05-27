@@ -1,0 +1,143 @@
+%--------------------------------------------------
+%	DOCUMENT IMPORTS
+%--------------------------------------------------
+\documentclass{beamer}
+\usetheme{CambridgeUS}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tkz-graph}
+\usepackage{amsmath, amssymb, mathtools, amsthm}
+\usepackage{tikz-uml}
+%-----------------------------------------------
+% DOCUMENT CONFIG
+%-----------------------------------------------
+\graphicspath{ {figures/} }
+\useinnertheme{rectangles}
+\setbeamertemplate{blocks}[default]
+\usefonttheme[onlymath]{serif}
+% Tikz
+\tikzstyle{vertex}=[circle, draw, inner sep=2pt, minimum size=5pt]
+\newcommand{\vertex}{\node[vertex]}
+\usetikzlibrary{arrows,petri,topaths,calc}
+% Commands
+\newcommand{\yy}[1]{\colorbox{yellow!70}{#1}}
+\newcommand{\bb}[1]{\colorbox{blue!30}{#1}}
+\newcommand{\rr}[1]{\colorbox{red!30}{#1}}
+\newcommand{\gr}[1]{\colorbox{green!30}{#1}}
+
+\title[Projet FOSYMA]{}
+\author{Bontems, Thirunavukarasu}
+\institute[]{Faculté des Sciences, Sorbonne Université\\Université Pierre et Marie Curie}
+\date{4 juin 2018}
+
+\begin{document}
+
+\section{Exploration}
+\begin{frame}
+    \frametitle{Exploration}
+    \begin{block}{Stockage de la carte}
+    \begin{itemize}
+        \item Listes de voisins
+        \item Ensemble de noeuds ouverts
+        \item Ensemble de noeuds fermés
+    \end{itemize}
+    \end{block}
+    \begin{block}{Déroulement}
+    \begin{enumerate}
+        \item Choix d'une destination parmi les noeuds ouverts (le plus proche)
+        \item Calcul du chemin par BFS
+        \item Mise à jour des points d'intérêt
+    \end{enumerate}
+    \end{block}
+\end{frame}
+
+\section{Coordination}
+\begin{frame}
+\frametitle{Communication}
+\begin{center}
+\resizebox{8cm}{!}{
+    \begin{tikzpicture}
+    \umlstateinitial[x=-2, name=initial]
+    \umlbasicstate[x=-2, y=-2.3, fill=red!20]{Explore}
+    \umlbasicstate[y=-6, fill=blue!20]{CheckVoiceMail}
+    \umlbasicstate[y=-6, x=4.4]{RequestStandby}
+    \umlbasicstate[y=-6, x=9]{WaitForStandby}
+    \umlbasicstate[x=-1, y=-10]{SendData}
+    \umlbasicstate[y=-10, x=2.5]{RcvData}
+    \umlbasicstate[y=-10, x=6]{SendGoal}
+    \umlbasicstate[y=-10, x=9.5]{RcvGoal}
+    \umlbasicstate[x=1.3, y=-2, fill=red!20]{AvoidConflict}
+    \umlbasicstate[x=5.1, y=-2, fill=red!20]{RandomWalk}
+    \umlbasicstate[x=9.3, y=-2, fill=red!20]{TypeSpecificMvmt}
+    
+    \umltrans{initial}{Explore}
+    \umlVHVtrans[anchors=south and 140]{Explore}{CheckVoiceMail}
+    \umlVHVtrans[anchors=140 and south]{CheckVoiceMail}{Explore}
+    \umltrans{CheckVoiceMail}{RequestStandby}
+    \umltrans{RequestStandby}{WaitForStandby}
+    \umlVHVtrans{WaitForStandby}{SendData}
+    \umlVHVtrans[anchors=north and 40, arm1=0.5cm]{WaitForStandby}{CheckVoiceMail}
+    \umlVHVtrans[anchor2=120, anchor1=-120, arm1=-0.5cm]{CheckVoiceMail}{SendData}
+    \umltrans{SendData}{RcvData}
+    \umltrans{RcvData}{SendGoal}
+    \umlVHVtrans[anchor2=-60, arm1=1.5cm]{RcvData}{CheckVoiceMail}
+    \umltrans{SendGoal}{RcvGoal}
+    \umlVHVtrans[anchor2=-40, arm1=2.5cm]{RcvGoal}{CheckVoiceMail}
+    \umlVHVtrans[anchors=-135 and 120, arm1=-0.4cm]{AvoidConflict}{CheckVoiceMail}
+    \umlVHVtrans[anchors=120 and -135, arm2=-0.4cm]{CheckVoiceMail}{AvoidConflict}
+    \umlVHVtrans[anchors=-135 and 100, arm1=-0.7cm]{RandomWalk}{CheckVoiceMail}
+    \umlVHVtrans[anchors=100 and -135, arm2=-0.7cm]{CheckVoiceMail}{RandomWalk}
+    \umlVHVtrans[anchors=-135 and 80, arm1=-1cm]{TypeSpecificMvmt}{CheckVoiceMail}
+    \umlVHVtrans[anchors=80 and -135, arm2=-1cm]{CheckVoiceMail}{TypeSpecificMvmt}
+    \end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Interblocage}
+\begin{columns}[T]
+    \begin{column}{.48\textwidth}
+    \center
+    \begin{tikzpicture}
+        \vertex (v1) at (0,0) {};
+        \vertex[fill=black] (v2) at (1,0) [label=below:$a_1$] {};
+        \vertex[fill=black] (v3) at (2,0) [label=below:$a_2$] {};
+        \vertex (v4) at (3,0) {};
+        \vertex (v5) at (0.5,1) {};
+        
+        \path
+        (v1) edge (v2)
+        (v2) edge (v3)
+        (v2) edge (v5)
+        (v3) edge (v4)
+        ;
+    \end{tikzpicture}
+    \end{column}~
+    \begin{column}{.48\textwidth}
+    \begin{itemize}
+        \item Calcul de plans d'échappées
+        \item Fallback sur \textit{Walk to random}
+    \end{itemize}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ramassage des trésors}
+\begin{itemize}
+    \item Meilleur point de trésor connu
+    \item Connaissance de la capacité des autres collecteurs
+    \item Dépose lorsque plein et régulièrement
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Placement du silo}
+Betweenness centrality
+\end{frame}
+\end{document}
