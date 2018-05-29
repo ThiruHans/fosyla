@@ -50,7 +50,8 @@
     \begin{enumerate}
         \item Choix d'une destination parmi les noeuds ouverts (le plus proche)
         \item Calcul du chemin par BFS
-        \item Mise à jour des points d'intérêt
+        \item Agent de mise à jour des points d'intérêt
+        \item Exploration constante des autres agents
     \end{enumerate}
     \end{block}
 \end{frame}
@@ -104,11 +105,11 @@
     \begin{column}{.48\textwidth}
     \center
     \begin{tikzpicture}
-        \vertex (v1) at (0,0) {};
+        \vertex (v1) at (0,0) [label=above:$d_2$] {};
         \vertex[fill=black] (v2) at (1,0) [label=below:$a_1$] {};
         \vertex[fill=black] (v3) at (2,0) [label=below:$a_2$] {};
-        \vertex (v4) at (3,0) {};
-        \vertex (v5) at (0.5,1) {};
+        \vertex (v4) at (3,0) [label=above:$d_1$] {};
+        \vertex (v5) at (0.5,1) [label=right:$e$] {};
         
         \path
         (v1) edge (v2)
@@ -117,11 +118,12 @@
         (v3) edge (v4)
         ;
     \end{tikzpicture}
-    \end{column}~
+    \end{column}
     \begin{column}{.48\textwidth}
     \begin{itemize}
         \item Calcul de plans d'échappées
         \item Fallback sur \textit{Walk to random}
+        \item Peut prendre du temps...
     \end{itemize}
     \end{column}
 \end{columns}
@@ -130,14 +132,18 @@
 \begin{frame}
 \frametitle{Ramassage des trésors}
 \begin{itemize}
-    \item Meilleur point de trésor connu
+    \item Meilleur point de trésor connu (tri par valeur)
     \item Connaissance de la capacité des autres collecteurs
-    \item Dépose lorsque plein et régulièrement
+    \item Dépose au silo régulièrement et lorsque plein
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Placement du silo}
-Betweenness centrality
+\begin{itemize}
+    \item Calcul du sommet de betweenness centrality
+    \item Favorise le partage d'information
+    \item Sommet de grand degré
+\end{itemize}
 \end{frame}
 \end{document}
