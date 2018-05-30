@@ -26,3 +26,6 @@ MTPs-Main-Container.txt
 *.bcf
 *.run.xml
 !main.pdf
+!pres.pdf
+*.nav
+*.snm
