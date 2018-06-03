@@ -82,11 +82,13 @@ public class CollectorAgent extends Agent {
         if ((boolean) this.dataStore.get("avoiding_conflict"))
             return M_AVOID_CONFLICT;
 
-        if (this.getBackPackFreeSpace() == 0) {
+        if (this.getBackPackFreeSpace() == 0
+                && this.dataStore.get("tanker_position") != null) {
             return M_MOVE_TO_TANKER;
         }
 
-        if (this.timeSinceEmpty >= TIME_BEFORE_EMPTY) {
+        if (this.timeSinceEmpty >= TIME_BEFORE_EMPTY
+                && this.dataStore.get("tanker_position") != null) {
             return M_MOVE_TO_TANKER;
         }
 
@@ -103,6 +105,9 @@ public class CollectorAgent extends Agent {
     }
 
     public PointOfInterest findRelevantPoint() {
+        if (this.getBackPackFreeSpace() == 0) {
+            return null;
+        }
 //        int maxValue = -1;
 //        int bestValue = -1;
 //        int capacity = this.getBackPackFreeSpace();
